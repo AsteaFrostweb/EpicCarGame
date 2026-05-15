@@ -24,6 +24,11 @@ public class CameraFollow : MonoBehaviour
         [Range(0f, 1f)] public float velocityDirectionBias;
         public float extraDistanceAtMaxDrift;
 
+        [Header("Speed Framing")]
+        public float speedForMaxOffset;
+        public float extraDistanceAtMaxSpeed;
+        public float extraHeightAtMaxSpeed;
+
         [Header("Angle-Based Side Correction")]
         public float sideCorrectionStrength;
         public float sideCorrectionSpeed;
@@ -45,6 +50,9 @@ public class CameraFollow : MonoBehaviour
             minVelocityForDirection = Mathf.Max(0f, minVelocityForDirection);
             velocityDirectionBias = Mathf.Clamp01(velocityDirectionBias);
             extraDistanceAtMaxDrift = Mathf.Max(0f, extraDistanceAtMaxDrift);
+            speedForMaxOffset = Mathf.Max(0.01f, speedForMaxOffset);
+            extraDistanceAtMaxSpeed = Mathf.Max(0f, extraDistanceAtMaxSpeed);
+            extraHeightAtMaxSpeed = Mathf.Max(0f, extraHeightAtMaxSpeed);
             sideCorrectionStrength = Mathf.Max(0f, sideCorrectionStrength);
             sideCorrectionSpeed = Mathf.Max(0f, sideCorrectionSpeed);
             maxSideOffset = Mathf.Max(0f, maxSideOffset);
@@ -74,6 +82,9 @@ public class CameraFollow : MonoBehaviour
         minVelocityForDirection = 2f,
         velocityDirectionBias = 0.75f,
         extraDistanceAtMaxDrift = 2.5f,
+        speedForMaxOffset = 60f,
+        extraDistanceAtMaxSpeed = 4f,
+        extraHeightAtMaxSpeed = 1.8f,
         sideCorrectionStrength = 1f,
         sideCorrectionSpeed = 5f,
         maxSideOffset = 5f,
@@ -96,6 +107,9 @@ public class CameraFollow : MonoBehaviour
         minVelocityForDirection = 1.5f,
         velocityDirectionBias = 0.95f,
         extraDistanceAtMaxDrift = 4.5f,
+        speedForMaxOffset = 60f,
+        extraDistanceAtMaxSpeed = 6f,
+        extraHeightAtMaxSpeed = 2.4f,
         sideCorrectionStrength = 1.2f,
         sideCorrectionSpeed = 2.75f,
         maxSideOffset = 7.5f,
@@ -104,6 +118,13 @@ public class CameraFollow : MonoBehaviour
 
     [Header("Update Mode")]
     [SerializeField] private bool useFixedUpdate = false;
+
+    [Header("Ground Clearance")]
+    [SerializeField] private bool useGroundClearance = true;
+    [SerializeField] private LayerMask groundLayers = ~0;
+    [SerializeField] private float groundRaycastHeight = 25f;
+    [SerializeField] private float groundRaycastDistance = 60f;
+    [SerializeField] private float minGroundClearance = 1.2f;
 
     private float currentSideOffset;
     private Rigidbody targetRigidbody;
@@ -118,6 +139,9 @@ public class CameraFollow : MonoBehaviour
     {
         responsiveTuning.Clamp();
         cinematicDriftTuning.Clamp();
+        groundRaycastHeight = Mathf.Max(0.1f, groundRaycastHeight);
+        groundRaycastDistance = Mathf.Max(0.1f, groundRaycastDistance);
+        minGroundClearance = Mathf.Max(0f, minGroundClearance);
     }
 
     private void FixedUpdate()
@@ -215,14 +239,48 @@ public class CameraFollow : MonoBehaviour
             tuning.extraDistanceAtMaxDrift,
             Mathf.InverseLerp(0f, 90f, driftAngle)
         );
+        float speedOffsetT = GetSpeedOffsetT(tuning);
 
         Vector3 basePosition =
             target.position
-            - followDirection * (tuning.distance + driftDistanceOffset)
-            + Vector3.up * tuning.height;
+            - followDirection * (tuning.distance + driftDistanceOffset + tuning.extraDistanceAtMaxSpeed * speedOffsetT)
+            + Vector3.up * (tuning.height + tuning.extraHeightAtMaxSpeed * speedOffsetT);
 
         Vector3 sideCorrection = transform.right * currentSideOffset;
-        return basePosition + sideCorrection;
+        return ApplyGroundClearance(basePosition + sideCorrection);
+    }
+
+    private float GetSpeedOffsetT(CameraStyleTuning tuning)
+    {
+        if (targetRigidbody == null)
+        {
+            return 0f;
+        }
+
+        Vector3 planarVelocity = Vector3.ProjectOnPlane(targetRigidbody.linearVelocity, Vector3.up);
+        return Mathf.Clamp01(planarVelocity.magnitude / tuning.speedForMaxOffset);
+    }
+
+    private Vector3 ApplyGroundClearance(Vector3 desiredPosition)
+    {
+        if (!useGroundClearance)
+        {
+            return desiredPosition;
+        }
+
+        Vector3 rayStart = desiredPosition + Vector3.up * groundRaycastHeight;
+        if (!Physics.Raycast(rayStart, Vector3.down, out RaycastHit hit, groundRaycastDistance, groundLayers, QueryTriggerInteraction.Ignore))
+        {
+            return desiredPosition;
+        }
+
+        float minY = hit.point.y + minGroundClearance;
+        if (desiredPosition.y < minY)
+        {
+            desiredPosition.y = minY;
+        }
+
+        return desiredPosition;
     }
 
     private Quaternion GetTargetRotation(CameraStyleTuning tuning)
