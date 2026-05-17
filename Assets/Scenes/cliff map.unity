@@ -6442,6 +6442,18 @@ PrefabInstance:
       propertyPath: target
       value: 
       objectReference: {fileID: 579872138}
+    - target: {fileID: 5986236349175801746, guid: 9e6e65014ac2827438a2b98c79b2a9b4, type: 3}
+      propertyPath: responsiveTuning.height
+      value: 2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5986236349175801746, guid: 9e6e65014ac2827438a2b98c79b2a9b4, type: 3}
+      propertyPath: responsiveTuning.distance
+      value: 5.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5986236349175801746, guid: 9e6e65014ac2827438a2b98c79b2a9b4, type: 3}
+      propertyPath: responsiveTuning.lookHeight
+      value: 1.4
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
