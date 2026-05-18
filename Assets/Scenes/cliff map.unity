@@ -2705,7 +2705,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7564635755307864550, guid: 7c9ddb4e815a82e429eec8e1051cafea, type: 3}
       propertyPath: driftRearForwardGrip
-      value: 0.86
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7564635755307864550, guid: 7c9ddb4e815a82e429eec8e1051cafea, type: 3}
+      propertyPath: driftRearSidewaysGrip
+      value: 0.85
       objectReference: {fileID: 0}
     - target: {fileID: 8536995660524687386, guid: 7c9ddb4e815a82e429eec8e1051cafea, type: 3}
       propertyPath: m_LocalPosition.x
