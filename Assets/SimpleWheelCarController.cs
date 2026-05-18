@@ -83,6 +83,21 @@ public class SimpleWheelCarController : MonoBehaviour
     public float driftYawTorque = 8f;
     [Range(0f, 1f)] public float counterSteerAssist = 0.18f;
 
+    [Header("Dynamic Tyre Grip")]
+    public bool enableDynamicTyreGrip = true;
+    public float frontSlideForwardGrip = 1.25f;
+    public float frontSlideSidewaysGrip = 0.95f;
+    public float frontSlipStartAngle = 5f;
+    public float frontSlipFullAngle = 24f;
+    public float rearSlipStartAngle = 4f;
+    public float rearSlipFullAngle = 34f;
+    public float rearForwardSlipForFullSlide = 0.65f;
+    [Range(0f, 1f)] public float brakeRearSlideInfluence = 0.3f;
+    public float gripBuildResponse = 14f;
+    public float gripRecoveryResponse = 7f;
+    [Range(0f, 1f)] public float stabilitySlideSuppression = 0.85f;
+    public float maxSlideYawRateMultiplier = 2.4f;
+
     [Header("Wheel Collider Defaults")]
     public float wheelMass = 26f;
     public float wheelDampingRate = 0.9f;
@@ -103,6 +118,14 @@ public class SimpleWheelCarController : MonoBehaviour
     private float slipAngle;
     private float rearForwardSlip;
     private float rearSidewaysSlip;
+    private float frontSlipAngle;
+    private float rearSlipAngle;
+    private float frontSlideAmount;
+    private float rearSlideAmount;
+    private float currentFrontForwardGrip;
+    private float currentFrontSidewaysGrip;
+    private float currentRearForwardGrip;
+    private float currentRearSidewaysGrip;
     private float currentDriveTorque;
     private float groundedAmount;
 
@@ -113,6 +136,10 @@ public class SimpleWheelCarController : MonoBehaviour
     public float SlipAngle => slipAngle;
     public float RearForwardSlip => rearForwardSlip;
     public float RearSidewaysSlip => rearSidewaysSlip;
+    public float FrontSlipAngle => frontSlipAngle;
+    public float RearSlipAngle => rearSlipAngle;
+    public float FrontSlideAmount => frontSlideAmount;
+    public float RearSlideAmount => rearSlideAmount;
     public float RecoveryAssist => 0f;
     public float Speed01 => Mathf.Clamp01(speed / maxSpeed);
     public float ForwardSpeed01 => Mathf.Clamp01(Mathf.Abs(currentForwardVelocity) / maxSpeed);
@@ -137,6 +164,7 @@ public class SimpleWheelCarController : MonoBehaviour
             rb.centerOfMass += centerOfMassOffset;
         }
 
+        InitializeCurrentGrip();
         ApplyWheelColliderDefaults();
         ApplyWheelFriction();
     }
@@ -167,6 +195,16 @@ public class SimpleWheelCarController : MonoBehaviour
         driftBuildSpeed = Mathf.Max(0f, driftBuildSpeed);
         driftRecoverSpeed = Mathf.Max(0f, driftRecoverSpeed);
         driftYawTorque = Mathf.Max(0f, driftYawTorque);
+        frontSlideForwardGrip = Mathf.Max(0f, frontSlideForwardGrip);
+        frontSlideSidewaysGrip = Mathf.Max(0f, frontSlideSidewaysGrip);
+        frontSlipStartAngle = Mathf.Max(0f, frontSlipStartAngle);
+        frontSlipFullAngle = Mathf.Max(frontSlipStartAngle + 0.01f, frontSlipFullAngle);
+        rearSlipStartAngle = Mathf.Max(0f, rearSlipStartAngle);
+        rearSlipFullAngle = Mathf.Max(rearSlipStartAngle + 0.01f, rearSlipFullAngle);
+        rearForwardSlipForFullSlide = Mathf.Max(0.01f, rearForwardSlipForFullSlide);
+        gripBuildResponse = Mathf.Max(0f, gripBuildResponse);
+        gripRecoveryResponse = Mathf.Max(0f, gripRecoveryResponse);
+        maxSlideYawRateMultiplier = Mathf.Max(1f, maxSlideYawRateMultiplier);
         suspensionDistance = Mathf.Max(0.01f, suspensionDistance);
         suspensionSpring = Mathf.Max(0f, suspensionSpring);
         suspensionDamper = Mathf.Max(0f, suspensionDamper);
@@ -232,6 +270,20 @@ public class SimpleWheelCarController : MonoBehaviour
         driftYawTorque = 8f;
         counterSteerAssist = 0.18f;
 
+        enableDynamicTyreGrip = true;
+        frontSlideForwardGrip = 1.25f;
+        frontSlideSidewaysGrip = 0.95f;
+        frontSlipStartAngle = 5f;
+        frontSlipFullAngle = 24f;
+        rearSlipStartAngle = 4f;
+        rearSlipFullAngle = 34f;
+        rearForwardSlipForFullSlide = 0.65f;
+        brakeRearSlideInfluence = 0.3f;
+        gripBuildResponse = 14f;
+        gripRecoveryResponse = 7f;
+        stabilitySlideSuppression = 0.85f;
+        maxSlideYawRateMultiplier = 2.4f;
+
         wheelMass = 26f;
         wheelDampingRate = 0.9f;
         suspensionDistance = 0.28f;
@@ -240,6 +292,7 @@ public class SimpleWheelCarController : MonoBehaviour
         suspensionDamper = 5200f;
         suspensionTargetPosition = 0.5f;
 
+        InitializeCurrentGrip();
         ApplyWheelColliderDefaults();
         ApplyWheelFriction();
     }
@@ -269,7 +322,7 @@ public class SimpleWheelCarController : MonoBehaviour
     {
         UpdateTelemetry();
         SmoothInputs();
-        UpdateDriftAmount();
+        UpdateDynamicGrip();
         ApplyWheelFriction();
         ApplyMotor();
         ApplySteering();
@@ -301,6 +354,8 @@ public class SimpleWheelCarController : MonoBehaviour
     {
         currentForwardVelocity = forwardVelocity;
         slipAngle = CalculateSlipAngle();
+        frontSlipAngle = CalculateFrontAxleSlipAngle();
+        rearSlipAngle = CalculateRearAxleSlipAngle();
         rearForwardSlip = GetAverageAbsForwardSlip(rearLeftCollider, rearRightCollider);
         rearSidewaysSlip = GetAverageAbsSidewaysSlip(rearLeftCollider, rearRightCollider);
         groundedAmount = Mathf.MoveTowards(
@@ -309,14 +364,44 @@ public class SimpleWheelCarController : MonoBehaviour
             groundedDownforceFadeSpeed * Time.fixedDeltaTime);
     }
 
-    private void UpdateDriftAmount()
+    private void UpdateDynamicGrip()
     {
-        bool canDrift = enableDrift && speed >= driftEnterSpeed;
-        bool wantsDrift = canDrift && isHandbraking && Mathf.Abs(smoothedSteerInput) > 0.05f;
-        float targetDriftAmount = wantsDrift ? 1f : 0f;
-        float rate = targetDriftAmount > driftAmount ? driftBuildSpeed : driftRecoverSpeed;
+        if (!enableDynamicTyreGrip)
+        {
+            bool canDrift = enableDrift && speed >= driftEnterSpeed;
+            bool wantsDrift = canDrift && isHandbraking && Mathf.Abs(smoothedSteerInput) > 0.05f;
+            float targetDriftAmount = wantsDrift ? 1f : 0f;
+            float rate = targetDriftAmount > driftAmount ? driftBuildSpeed : driftRecoverSpeed;
 
-        driftAmount = Mathf.MoveTowards(driftAmount, targetDriftAmount, rate * Time.fixedDeltaTime);
+            driftAmount = Mathf.MoveTowards(driftAmount, targetDriftAmount, rate * Time.fixedDeltaTime);
+            frontSlideAmount = 0f;
+            rearSlideAmount = driftAmount;
+            return;
+        }
+
+        float frontAngleSlide = SlipAngleTo01(Mathf.Abs(frontSlipAngle), frontSlipStartAngle, frontSlipFullAngle);
+        float rearAngleSlide = SlipAngleTo01(Mathf.Abs(rearSlipAngle), rearSlipStartAngle, rearSlipFullAngle);
+        float rearWheelSpinSlide = Mathf.Clamp01(rearForwardSlip / rearForwardSlipForFullSlide);
+        float throttleSlide = rearWheelSpinSlide * Mathf.InverseLerp(0.2f, 0.85f, Mathf.Clamp01(smoothedVerticalInput));
+        float brakeSlide = isBraking ? brakeRearSlideInfluence * Speed01 : 0f;
+        float handbrakeSlide = enableDrift && isHandbraking && speed >= driftEnterSpeed ? 1f : 0f;
+
+        float targetFrontSlide = frontAngleSlide;
+        float targetRearSlide = Mathf.Clamp01(Mathf.Max(rearAngleSlide, throttleSlide, brakeSlide, handbrakeSlide));
+
+        frontSlideAmount = MoveGrip01(frontSlideAmount, targetFrontSlide);
+        rearSlideAmount = MoveGrip01(rearSlideAmount, targetRearSlide);
+        driftAmount = rearSlideAmount;
+
+        float targetFrontForwardGrip = Mathf.Lerp(frontForwardGrip, frontSlideForwardGrip, frontSlideAmount);
+        float targetFrontSidewaysGrip = Mathf.Lerp(frontSidewaysGrip, frontSlideSidewaysGrip, frontSlideAmount);
+        float targetRearForwardGrip = Mathf.Lerp(rearForwardGrip, driftRearForwardGrip, rearSlideAmount);
+        float targetRearSidewaysGrip = Mathf.Lerp(rearSidewaysGrip, driftRearSidewaysGrip, rearSlideAmount);
+
+        currentFrontForwardGrip = MoveGrip(currentFrontForwardGrip, targetFrontForwardGrip);
+        currentFrontSidewaysGrip = MoveGrip(currentFrontSidewaysGrip, targetFrontSidewaysGrip);
+        currentRearForwardGrip = MoveGrip(currentRearForwardGrip, targetRearForwardGrip);
+        currentRearSidewaysGrip = MoveGrip(currentRearSidewaysGrip, targetRearSidewaysGrip);
     }
 
     private void ApplyMotor()
@@ -395,13 +480,22 @@ public class SimpleWheelCarController : MonoBehaviour
 
     private void ApplyWheelFriction()
     {
-        float rearForward = Mathf.Lerp(rearForwardGrip, driftRearForwardGrip, driftAmount);
-        float rearSideways = Mathf.Lerp(rearSidewaysGrip, driftRearSidewaysGrip, driftAmount);
+        if (!Application.isPlaying || !enableDynamicTyreGrip)
+        {
+            float rearForward = Mathf.Lerp(rearForwardGrip, driftRearForwardGrip, driftAmount);
+            float rearSideways = Mathf.Lerp(rearSidewaysGrip, driftRearSidewaysGrip, driftAmount);
 
-        ApplyFrictionToWheel(frontLeftCollider, frontForwardGrip, frontSidewaysGrip);
-        ApplyFrictionToWheel(frontRightCollider, frontForwardGrip, frontSidewaysGrip);
-        ApplyFrictionToWheel(rearLeftCollider, rearForward, rearSideways);
-        ApplyFrictionToWheel(rearRightCollider, rearForward, rearSideways);
+            ApplyFrictionToWheel(frontLeftCollider, frontForwardGrip, frontSidewaysGrip);
+            ApplyFrictionToWheel(frontRightCollider, frontForwardGrip, frontSidewaysGrip);
+            ApplyFrictionToWheel(rearLeftCollider, rearForward, rearSideways);
+            ApplyFrictionToWheel(rearRightCollider, rearForward, rearSideways);
+            return;
+        }
+
+        ApplyFrictionToWheel(frontLeftCollider, currentFrontForwardGrip, currentFrontSidewaysGrip);
+        ApplyFrictionToWheel(frontRightCollider, currentFrontForwardGrip, currentFrontSidewaysGrip);
+        ApplyFrictionToWheel(rearLeftCollider, currentRearForwardGrip, currentRearSidewaysGrip);
+        ApplyFrictionToWheel(rearRightCollider, currentRearForwardGrip, currentRearSidewaysGrip);
     }
 
     private void ApplyArcadeForces()
@@ -448,28 +542,32 @@ public class SimpleWheelCarController : MonoBehaviour
     {
         float yawRate = Vector3.Dot(rb.angularVelocity, transform.up);
         float speedT = Speed01;
+        float slideT = enableDynamicTyreGrip ? Mathf.Max(frontSlideAmount, rearSlideAmount) : driftAmount;
+        float stabilityT = 1f - Mathf.Clamp01(slideT * stabilitySlideSuppression);
 
         if (yawDamping > 0f)
         {
-            rb.AddTorque(transform.up * -yawRate * yawDamping * speedT, ForceMode.Acceleration);
+            rb.AddTorque(transform.up * -yawRate * yawDamping * speedT * stabilityT, ForceMode.Acceleration);
         }
 
-        if (straightLineYawDamping > 0f && driftAmount < 0.2f)
+        if (straightLineYawDamping > 0f && slideT < 0.2f)
         {
             float straightLineT = 1f - Mathf.Clamp01(Mathf.Abs(smoothedSteerInput) / 0.35f);
-            rb.AddTorque(transform.up * -yawRate * straightLineYawDamping * speedT * straightLineT, ForceMode.Acceleration);
+            rb.AddTorque(transform.up * -yawRate * straightLineYawDamping * speedT * straightLineT * stabilityT, ForceMode.Acceleration);
         }
 
-        if (stabilityAssist > 0f && driftAmount < 0.2f && Mathf.Abs(slipAngle) > 1f)
+        if (stabilityAssist > 0f && slideT < 0.85f && Mathf.Abs(slipAngle) > 1f)
         {
-            float stabilityTorque = Mathf.Clamp(-slipAngle / 45f, -1f, 1f) * stabilityAssist * speedT;
+            float stabilityTorque = Mathf.Clamp(-slipAngle / 45f, -1f, 1f) * stabilityAssist * speedT * stabilityT;
             rb.AddTorque(transform.up * stabilityTorque, ForceMode.Acceleration);
         }
 
-        if (Mathf.Abs(yawRate) > maxYawRate)
+        float currentMaxYawRate = maxYawRate * Mathf.Lerp(1f, maxSlideYawRateMultiplier, slideT);
+
+        if (Mathf.Abs(yawRate) > currentMaxYawRate)
         {
             Vector3 localAngularVelocity = transform.InverseTransformDirection(rb.angularVelocity);
-            localAngularVelocity.y = Mathf.Sign(localAngularVelocity.y) * maxYawRate;
+            localAngularVelocity.y = Mathf.Sign(localAngularVelocity.y) * currentMaxYawRate;
             rb.angularVelocity = transform.TransformDirection(localAngularVelocity);
         }
     }
@@ -496,6 +594,14 @@ public class SimpleWheelCarController : MonoBehaviour
         sidewaysFriction.asymptoteValue = 0.72f;
         sidewaysFriction.stiffness = sidewaysStiffness;
         wheel.sidewaysFriction = sidewaysFriction;
+    }
+
+    private void InitializeCurrentGrip()
+    {
+        currentFrontForwardGrip = frontForwardGrip;
+        currentFrontSidewaysGrip = frontSidewaysGrip;
+        currentRearForwardGrip = rearForwardGrip;
+        currentRearSidewaysGrip = rearSidewaysGrip;
     }
 
     private void ApplyWheelColliderDefaults(WheelCollider wheel)
@@ -532,6 +638,76 @@ public class SimpleWheelCarController : MonoBehaviour
         }
 
         return Vector3.SignedAngle(transform.forward, planarVelocity.normalized, transform.up);
+    }
+
+    private float CalculateFrontAxleSlipAngle()
+    {
+        Vector3 axlePosition = GetAxlePosition(frontLeftCollider, frontRightCollider, transform.position + transform.forward);
+        Vector3 wheelDirection = Quaternion.AngleAxis(currentSteerAngle, transform.up) * transform.forward;
+        return CalculatePointSlipAngle(axlePosition, wheelDirection);
+    }
+
+    private float CalculateRearAxleSlipAngle()
+    {
+        Vector3 axlePosition = GetAxlePosition(rearLeftCollider, rearRightCollider, transform.position - transform.forward);
+        return CalculatePointSlipAngle(axlePosition, transform.forward);
+    }
+
+    private float CalculatePointSlipAngle(Vector3 point, Vector3 referenceDirection)
+    {
+        if (rb == null)
+        {
+            return 0f;
+        }
+
+        Vector3 pointVelocity = Vector3.ProjectOnPlane(rb.GetPointVelocity(point), transform.up);
+        Vector3 planarReference = Vector3.ProjectOnPlane(referenceDirection, transform.up);
+
+        if (pointVelocity.sqrMagnitude < 0.25f || planarReference.sqrMagnitude < 0.001f)
+        {
+            return 0f;
+        }
+
+        return Vector3.SignedAngle(planarReference.normalized, pointVelocity.normalized, transform.up);
+    }
+
+    private Vector3 GetAxlePosition(WheelCollider leftWheel, WheelCollider rightWheel, Vector3 fallback)
+    {
+        if (leftWheel != null && rightWheel != null)
+        {
+            return (leftWheel.transform.position + rightWheel.transform.position) * 0.5f;
+        }
+
+        if (leftWheel != null)
+        {
+            return leftWheel.transform.position;
+        }
+
+        if (rightWheel != null)
+        {
+            return rightWheel.transform.position;
+        }
+
+        return fallback;
+    }
+
+    private float SlipAngleTo01(float angle, float startAngle, float fullAngle)
+    {
+        return Mathf.Clamp01(Mathf.InverseLerp(startAngle, fullAngle, angle));
+    }
+
+    private float MoveGrip01(float current, float target)
+    {
+        float response = target > current ? gripBuildResponse : gripRecoveryResponse;
+        float t = 1f - Mathf.Exp(-response * Time.fixedDeltaTime);
+        return Mathf.Lerp(current, target, t);
+    }
+
+    private float MoveGrip(float current, float target)
+    {
+        float response = target < current ? gripBuildResponse : gripRecoveryResponse;
+        float t = 1f - Mathf.Exp(-response * Time.fixedDeltaTime);
+        return Mathf.Lerp(current, target, t);
     }
 
     private float GetAverageAbsForwardSlip(WheelCollider leftWheel, WheelCollider rightWheel)
