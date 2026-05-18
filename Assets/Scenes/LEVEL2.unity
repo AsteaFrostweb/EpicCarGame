@@ -119,6 +119,55 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &126455602
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 126455604}
+  - component: {fileID: 126455603}
+  m_Layer: 0
+  m_Name: Sky and Fog Global Volume
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &126455603
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 126455602}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IsGlobal: 1
+  priority: 0
+  blendDistance: 0
+  weight: 1
+  sharedProfile: {fileID: 11400000, guid: 333dcd409e054a3469c24924bb4fdb46, type: 2}
+--- !u!4 &126455604
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 126455602}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 27.414593, y: 13.687875, z: 1.6889615}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &579872137
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -648,7 +697,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
---- !u!1001 &2026589786
+--- !u!1001 &1600963206
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -662,19 +711,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7d2b087840b71c94b872c823875ee6bb, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -1.7
+      value: -1.4
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7d2b087840b71c94b872c823875ee6bb, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -3.683386
+      value: -5
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7d2b087840b71c94b872c823875ee6bb, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.7071067
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7d2b087840b71c94b872c823875ee6bb, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0.7071068
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7d2b087840b71c94b872c823875ee6bb, type: 3}
       propertyPath: m_LocalRotation.y
@@ -682,7 +731,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7d2b087840b71c94b872c823875ee6bb, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 7d2b087840b71c94b872c823875ee6bb, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -704,22 +753,22 @@ PrefabInstance:
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 7d2b087840b71c94b872c823875ee6bb, type: 3}
+    - targetCorrespondingSourceObject: {fileID: 6676088952749084255, guid: 7d2b087840b71c94b872c823875ee6bb, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2026589788}
+      addedObject: {fileID: 1875905152}
   m_SourcePrefab: {fileID: 100100000, guid: 7d2b087840b71c94b872c823875ee6bb, type: 3}
---- !u!1 &2026589787 stripped
+--- !u!1 &1875905150 stripped
 GameObject:
-  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 7d2b087840b71c94b872c823875ee6bb, type: 3}
-  m_PrefabInstance: {fileID: 2026589786}
+  m_CorrespondingSourceObject: {fileID: 6676088952749084255, guid: 7d2b087840b71c94b872c823875ee6bb, type: 3}
+  m_PrefabInstance: {fileID: 1600963206}
   m_PrefabAsset: {fileID: 0}
---- !u!64 &2026589788
+--- !u!64 &1875905152
 MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2026589787}
+  m_GameObject: {fileID: 1875905150}
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -744,4 +793,5 @@ SceneRoots:
   - {fileID: 888819104}
   - {fileID: 1079445266}
   - {fileID: 1397982087}
-  - {fileID: 2026589786}
+  - {fileID: 1600963206}
+  - {fileID: 126455604}
