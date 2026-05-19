@@ -2704,6 +2704,14 @@ PrefabInstance:
       value: 32
       objectReference: {fileID: 0}
     - target: {fileID: 7564635755307864550, guid: 7c9ddb4e815a82e429eec8e1051cafea, type: 3}
+      propertyPath: motorTorque
+      value: 1200
+      objectReference: {fileID: 0}
+    - target: {fileID: 7564635755307864550, guid: 7c9ddb4e815a82e429eec8e1051cafea, type: 3}
+      propertyPath: counterSteerAssist
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7564635755307864550, guid: 7c9ddb4e815a82e429eec8e1051cafea, type: 3}
       propertyPath: driftRearForwardGrip
       value: 0.9
       objectReference: {fileID: 0}
