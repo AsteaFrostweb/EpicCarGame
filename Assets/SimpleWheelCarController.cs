@@ -30,6 +30,14 @@ public class SimpleWheelCarController : MonoBehaviour
     public float reverseTorqueMultiplier = 0.45f;
     public float brakeResponseSpeed = 2.25f;
 
+    [Header("Nitros")]
+    public KeyCode nitrosKey = KeyCode.LeftShift;
+    public float maxNitrosAmount = 100f;
+    public float nitrosAmount = 100f;
+    public float nitrosSpeed = 24f;
+    public float nitrosDepletionRate = 25f;
+    public bool requireThrottleForNitros = true;
+
     [Header("Input Feel")]
     public float throttleResponse = 8f;
     public float steerResponse = 10f;
@@ -111,6 +119,7 @@ public class SimpleWheelCarController : MonoBehaviour
 
     private float verticalInput;
     private float horizontalInput;
+    private bool nitrosInput;
     private float smoothedVerticalInput;
     private float smoothedSteerInput;
     private float currentSteerAngle;
@@ -147,6 +156,8 @@ public class SimpleWheelCarController : MonoBehaviour
     public float Reverse01 => Mathf.Clamp01(-smoothedVerticalInput);
     public float Brake01 => isBraking ? 1f : 0f;
     public float Handbrake01 => isHandbraking ? 1f : 0f;
+    public float Nitros01 => maxNitrosAmount > 0f ? Mathf.Clamp01(nitrosAmount / maxNitrosAmount) : 0f;
+    public bool IsNitrosActive => CanUseNitros();
     public float Steering01 => Mathf.Clamp(smoothedSteerInput, -1f, 1f);
     public float EngineLoad01 => motorTorque > 0f ? Mathf.Clamp01(Mathf.Abs(currentDriveTorque) / motorTorque) : 0f;
     public float WheelSpin01 => Mathf.Clamp01(rearForwardSlip);
@@ -175,6 +186,10 @@ public class SimpleWheelCarController : MonoBehaviour
         brakeTorque = Mathf.Max(0f, brakeTorque);
         handbrakeTorque = Mathf.Max(0f, handbrakeTorque);
         maxSpeed = Mathf.Max(0.01f, maxSpeed);
+        maxNitrosAmount = Mathf.Max(0f, maxNitrosAmount);
+        nitrosAmount = Mathf.Clamp(nitrosAmount, 0f, maxNitrosAmount);
+        nitrosSpeed = Mathf.Max(0f, nitrosSpeed);
+        nitrosDepletionRate = Mathf.Max(0f, nitrosDepletionRate);
         maxSteerAngle = Mathf.Max(0f, maxSteerAngle);
         reverseTorqueMultiplier = Mathf.Max(0f, reverseTorqueMultiplier);
         brakeResponseSpeed = Mathf.Max(0f, brakeResponseSpeed);
@@ -225,6 +240,13 @@ public class SimpleWheelCarController : MonoBehaviour
         maxSteerAngle = PresetMaxSteerAngle;
         reverseTorqueMultiplier = 0.45f;
         brakeResponseSpeed = 2.25f;
+
+        nitrosKey = KeyCode.LeftShift;
+        maxNitrosAmount = 100f;
+        nitrosAmount = maxNitrosAmount;
+        nitrosSpeed = 24f;
+        nitrosDepletionRate = 25f;
+        requireThrottleForNitros = true;
 
         throttleResponse = 8f;
         steerResponse = 10f;
@@ -334,6 +356,7 @@ public class SimpleWheelCarController : MonoBehaviour
     {
         verticalInput = Input.GetAxis("Vertical");
         horizontalInput = Input.GetAxis("Horizontal");
+        nitrosInput = Input.GetKey(nitrosKey);
         currentForwardVelocity = forwardVelocity;
         isBraking = verticalInput < -0.01f && currentForwardVelocity > brakeResponseSpeed;
         isHandbraking = Input.GetKey(KeyCode.Space);
@@ -517,12 +540,44 @@ public class SimpleWheelCarController : MonoBehaviour
 
         ApplyYawStability();
         ApplyTurnAssist();
+        ApplyNitros();
 
         if (driftAmount > 0.01f && driftYawTorque > 0f)
         {
             float yawInput = smoothedSteerInput * driftYawTorque * driftAmount * Mathf.Clamp01(speed / 20f);
             rb.AddTorque(transform.up * yawInput, ForceMode.Acceleration);
         }
+    }
+
+    private void ApplyNitros()
+    {
+        if (!CanUseNitros())
+        {
+            return;
+        }
+
+        rb.AddForce(transform.forward * nitrosSpeed, ForceMode.Acceleration);
+        nitrosAmount = Mathf.Max(0f, nitrosAmount - nitrosDepletionRate * Time.fixedDeltaTime);
+    }
+
+    private bool CanUseNitros()
+    {
+        if (!nitrosInput || nitrosAmount <= 0f || nitrosSpeed <= 0f || nitrosDepletionRate <= 0f)
+        {
+            return false;
+        }
+
+        return !requireThrottleForNitros || smoothedVerticalInput > 0.05f;
+    }
+
+    public void AddNitros(float amount)
+    {
+        nitrosAmount = Mathf.Clamp(nitrosAmount + amount, 0f, maxNitrosAmount);
+    }
+
+    public void RefillNitros()
+    {
+        nitrosAmount = maxNitrosAmount;
     }
 
     private void ApplyTurnAssist()

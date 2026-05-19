@@ -23,11 +23,19 @@ public class CameraFollow : MonoBehaviour
         public float minVelocityForDirection;
         [Range(0f, 1f)] public float velocityDirectionBias;
         public float extraDistanceAtMaxDrift;
+        public float driftPullInDistance;
+        public float driftPullInHeight;
 
         [Header("Speed Framing")]
         public float speedForMaxOffset;
         public float extraDistanceAtMaxSpeed;
         public float extraHeightAtMaxSpeed;
+
+        [Header("Nitros Shake")]
+        public float nitrosShakePosition;
+        public float nitrosShakeRotation;
+        public float nitrosShakeFrequency;
+        public float nitrosShakeFadeSpeed;
 
         [Header("Angle-Based Side Correction")]
         public float sideCorrectionStrength;
@@ -50,9 +58,15 @@ public class CameraFollow : MonoBehaviour
             minVelocityForDirection = Mathf.Max(0f, minVelocityForDirection);
             velocityDirectionBias = Mathf.Clamp01(velocityDirectionBias);
             extraDistanceAtMaxDrift = Mathf.Max(0f, extraDistanceAtMaxDrift);
+            driftPullInDistance = Mathf.Max(0f, driftPullInDistance);
+            driftPullInHeight = Mathf.Max(0f, driftPullInHeight);
             speedForMaxOffset = Mathf.Max(0.01f, speedForMaxOffset);
             extraDistanceAtMaxSpeed = Mathf.Max(0f, extraDistanceAtMaxSpeed);
             extraHeightAtMaxSpeed = Mathf.Max(0f, extraHeightAtMaxSpeed);
+            nitrosShakePosition = Mathf.Max(0f, nitrosShakePosition);
+            nitrosShakeRotation = Mathf.Max(0f, nitrosShakeRotation);
+            nitrosShakeFrequency = Mathf.Max(0f, nitrosShakeFrequency);
+            nitrosShakeFadeSpeed = Mathf.Max(0f, nitrosShakeFadeSpeed);
             sideCorrectionStrength = Mathf.Max(0f, sideCorrectionStrength);
             sideCorrectionSpeed = Mathf.Max(0f, sideCorrectionSpeed);
             maxSideOffset = Mathf.Max(0f, maxSideOffset);
@@ -82,9 +96,15 @@ public class CameraFollow : MonoBehaviour
         minVelocityForDirection = 2f,
         velocityDirectionBias = 0.75f,
         extraDistanceAtMaxDrift = 2.5f,
+        driftPullInDistance = 1.4f,
+        driftPullInHeight = 0.35f,
         speedForMaxOffset = 60f,
         extraDistanceAtMaxSpeed = 4f,
         extraHeightAtMaxSpeed = 1.8f,
+        nitrosShakePosition = 0.12f,
+        nitrosShakeRotation = 0.65f,
+        nitrosShakeFrequency = 32f,
+        nitrosShakeFadeSpeed = 10f,
         sideCorrectionStrength = 1f,
         sideCorrectionSpeed = 5f,
         maxSideOffset = 5f,
@@ -107,9 +127,15 @@ public class CameraFollow : MonoBehaviour
         minVelocityForDirection = 1.5f,
         velocityDirectionBias = 0.95f,
         extraDistanceAtMaxDrift = 4.5f,
+        driftPullInDistance = 1.8f,
+        driftPullInHeight = 0.45f,
         speedForMaxOffset = 60f,
         extraDistanceAtMaxSpeed = 6f,
         extraHeightAtMaxSpeed = 2.4f,
+        nitrosShakePosition = 0.16f,
+        nitrosShakeRotation = 0.85f,
+        nitrosShakeFrequency = 30f,
+        nitrosShakeFadeSpeed = 10f,
         sideCorrectionStrength = 1.2f,
         sideCorrectionSpeed = 2.75f,
         maxSideOffset = 7.5f,
@@ -127,7 +153,9 @@ public class CameraFollow : MonoBehaviour
     [SerializeField] private float minGroundClearance = 1.2f;
 
     private float currentSideOffset;
+    private float nitrosShakeAmount;
     private Rigidbody targetRigidbody;
+    private SimpleWheelCarController targetCarController;
     private Vector3 smoothedPlanarFollowDirection;
 
     private void Awake()
@@ -176,6 +204,7 @@ public class CameraFollow : MonoBehaviour
 
         float sideT = 1f - Mathf.Exp(-tuning.sideCorrectionSpeed * deltaTime);
         currentSideOffset = Mathf.Lerp(currentSideOffset, desiredSideOffset, sideT);
+        UpdateNitrosShake(deltaTime, tuning);
 
         Vector3 desiredPosition = GetTargetPosition(tuning);
         Quaternion desiredRotation = GetTargetRotation(tuning);
@@ -192,6 +221,7 @@ public class CameraFollow : MonoBehaviour
 
         transform.position = Vector3.Lerp(transform.position, desiredPosition, movementT);
         transform.rotation = Quaternion.Slerp(transform.rotation, desiredRotation, rotationT);
+        ApplyNitrosShake(tuning);
     }
 
     private void CacheReferences()
@@ -199,6 +229,7 @@ public class CameraFollow : MonoBehaviour
         if (target == null)
         {
             targetRigidbody = null;
+            targetCarController = null;
             playerSettings = null;
             return;
         }
@@ -206,6 +237,11 @@ public class CameraFollow : MonoBehaviour
         if (targetRigidbody == null || targetRigidbody.transform != target)
         {
             targetRigidbody = target.GetComponent<Rigidbody>();
+        }
+
+        if (targetCarController == null || targetCarController.transform != target)
+        {
+            targetCarController = target.GetComponent<SimpleWheelCarController>();
         }
 
         if (playerSettings == null)
@@ -240,14 +276,56 @@ public class CameraFollow : MonoBehaviour
             Mathf.InverseLerp(0f, 90f, driftAngle)
         );
         float speedOffsetT = GetSpeedOffsetT(tuning);
+        float driftT = GetDriftT();
 
         Vector3 basePosition =
             target.position
-            - followDirection * (tuning.distance + driftDistanceOffset + tuning.extraDistanceAtMaxSpeed * speedOffsetT)
-            + Vector3.up * (tuning.height + tuning.extraHeightAtMaxSpeed * speedOffsetT);
+            - followDirection * Mathf.Max(
+                0.1f,
+                tuning.distance + driftDistanceOffset + tuning.extraDistanceAtMaxSpeed * speedOffsetT - tuning.driftPullInDistance * driftT)
+            + Vector3.up * Mathf.Max(
+                0f,
+                tuning.height + tuning.extraHeightAtMaxSpeed * speedOffsetT - tuning.driftPullInHeight * driftT);
 
         Vector3 sideCorrection = transform.right * currentSideOffset;
         return ApplyGroundClearance(basePosition + sideCorrection);
+    }
+
+    private void UpdateNitrosShake(float deltaTime, CameraStyleTuning tuning)
+    {
+        float targetShake = IsNitrosActive() ? 1f : 0f;
+        float shakeT = 1f - Mathf.Exp(-tuning.nitrosShakeFadeSpeed * deltaTime);
+        nitrosShakeAmount = Mathf.Lerp(nitrosShakeAmount, targetShake, shakeT);
+    }
+
+    private void ApplyNitrosShake(CameraStyleTuning tuning)
+    {
+        if (nitrosShakeAmount <= 0.001f || tuning.nitrosShakeFrequency <= 0f)
+        {
+            return;
+        }
+
+        float shakeTime = Time.time * tuning.nitrosShakeFrequency;
+        float horizontalNoise = Mathf.PerlinNoise(shakeTime, 0.21f) * 2f - 1f;
+        float verticalNoise = Mathf.PerlinNoise(0.47f, shakeTime) * 2f - 1f;
+        float rollNoise = Mathf.PerlinNoise(shakeTime, shakeTime + 1.31f) * 2f - 1f;
+
+        Vector3 positionOffset =
+            transform.right * horizontalNoise * tuning.nitrosShakePosition * nitrosShakeAmount
+            + transform.up * verticalNoise * tuning.nitrosShakePosition * nitrosShakeAmount;
+
+        transform.position += positionOffset;
+        transform.rotation *= Quaternion.Euler(0f, 0f, rollNoise * tuning.nitrosShakeRotation * nitrosShakeAmount);
+    }
+
+    private float GetDriftT()
+    {
+        return targetCarController != null ? targetCarController.Drift01 : 0f;
+    }
+
+    private bool IsNitrosActive()
+    {
+        return targetCarController != null && targetCarController.IsNitrosActive;
     }
 
     private float GetSpeedOffsetT(CameraStyleTuning tuning)

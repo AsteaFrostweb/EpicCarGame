@@ -316,7 +316,7 @@ WheelCollider:
     m_ExtremumValue: 1
     m_AsymptoteSlip: 0.82
     m_AsymptoteValue: 0.78
-    m_Stiffness: 1.55
+    m_Stiffness: 2.325
   m_SidewaysFriction:
     m_ExtremumSlip: 0.26
     m_ExtremumValue: 1
@@ -387,7 +387,7 @@ WheelCollider:
     m_ExtremumValue: 1
     m_AsymptoteSlip: 0.82
     m_AsymptoteValue: 0.78
-    m_Stiffness: 1.45
+    m_Stiffness: 2.175
   m_SidewaysFriction:
     m_ExtremumSlip: 0.26
     m_ExtremumValue: 1
@@ -458,7 +458,7 @@ WheelCollider:
     m_ExtremumValue: 1
     m_AsymptoteSlip: 0.82
     m_AsymptoteValue: 0.78
-    m_Stiffness: 1.55
+    m_Stiffness: 2.325
   m_SidewaysFriction:
     m_ExtremumSlip: 0.26
     m_ExtremumValue: 1
@@ -490,7 +490,7 @@ GameObject:
   - component: {fileID: 649134695006814107}
   - component: {fileID: 1288988658918056966}
   m_Layer: 0
-  m_Name: Car New
+  m_Name: Car
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -505,7 +505,7 @@ Transform:
   m_GameObject: {fileID: 5065299758313749095}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 105, y: 3.12, z: -376.67}
+  m_LocalPosition: {x: 0, y: 103, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -567,14 +567,14 @@ MonoBehaviour:
   frontRightMesh: {fileID: 3778558291560751301}
   rearLeftMesh: {fileID: 5663558233415822517}
   rearRightMesh: {fileID: 4228673527432889999}
-  motorTorque: 2400
+  motorTorque: 1200
   brakeTorque: 6200
   handbrakeTorque: 3600
-  maxSpeed: 50
+  maxSpeed: 56
   reverseTorqueMultiplier: 0.45
   brakeResponseSpeed: 2.25
   throttleResponse: 8
-  steerResponse: 10
+  steerResponse: 5
   steerReturnResponse: 14
   steeringDeadzone: 0.08
   steeringInputExponent: 1.35
@@ -594,12 +594,12 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 0.45
       value: 0.9
-      inSlope: 0
-      outSlope: 0
+      inSlope: -0.27333313
+      outSlope: -0.27333313
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
-      outWeight: 0
+      outWeight: 0.18181822
     - serializedVersion: 3
       time: 1
       value: 0.72
@@ -658,20 +658,33 @@ MonoBehaviour:
   yawDamping: 5
   straightLineYawDamping: 12
   stabilityAssist: 7
-  frontForwardGrip: 1.55
-  rearForwardGrip: 1.45
+  frontForwardGrip: 2.325
+  rearForwardGrip: 2.175
   frontSidewaysGrip: 1.75
   rearSidewaysGrip: 1.5
   enableDrift: 1
   driftEnterSpeed: 8
   driftBuildSpeed: 6
   driftRecoverSpeed: 4
-  driftRearSidewaysGrip: 0.76
-  driftRearForwardGrip: 1.05
+  driftRearSidewaysGrip: 0.85
+  driftRearForwardGrip: 0.9
   driftSteerMultiplier: 1.18
   driftThrottleMultiplier: 0.78
   driftYawTorque: 8
-  counterSteerAssist: 0.18
+  counterSteerAssist: 0.268
+  enableDynamicTyreGrip: 1
+  frontSlideForwardGrip: 1.25
+  frontSlideSidewaysGrip: 0.95
+  frontSlipStartAngle: 5
+  frontSlipFullAngle: 24
+  rearSlipStartAngle: 4
+  rearSlipFullAngle: 34
+  rearForwardSlipForFullSlide: 0.65
+  brakeRearSlideInfluence: 0.3
+  gripBuildResponse: 14
+  gripRecoveryResponse: 7
+  stabilitySlideSuppression: 0.85
+  maxSlideYawRateMultiplier: 2.4
   wheelMass: 26
   wheelDampingRate: 0.9
   suspensionDistance: 0.28
@@ -681,7 +694,7 @@ MonoBehaviour:
   suspensionTargetPosition: 0.5
   isBraking: 0
   isHandbraking: 0
-  currentForwardVelocity: 0
+  currentForwardVelocity: -0.9815379
 --- !u!114 &3252239985499057590
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1052,7 +1065,7 @@ WheelCollider:
     m_ExtremumValue: 1
     m_AsymptoteSlip: 0.82
     m_AsymptoteValue: 0.78
-    m_Stiffness: 1.45
+    m_Stiffness: 2.175
   m_SidewaysFriction:
     m_ExtremumSlip: 0.26
     m_ExtremumValue: 1

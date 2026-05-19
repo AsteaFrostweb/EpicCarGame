@@ -262,6 +262,15 @@ MonoBehaviour:
     minVelocityForDirection: 2
     velocityDirectionBias: 0.75
     extraDistanceAtMaxDrift: 2.5
+    driftPullInDistance: 1.4
+    driftPullInHeight: 0.35
+    speedForMaxOffset: 60
+    extraDistanceAtMaxSpeed: 4
+    extraHeightAtMaxSpeed: 1.8
+    nitrosShakePosition: 0.12
+    nitrosShakeRotation: 0.65
+    nitrosShakeFrequency: 32
+    nitrosShakeFadeSpeed: 10
     sideCorrectionStrength: 1
     sideCorrectionSpeed: 5
     maxSideOffset: 5
@@ -280,6 +289,15 @@ MonoBehaviour:
     minVelocityForDirection: 1.5
     velocityDirectionBias: 0.95
     extraDistanceAtMaxDrift: 4.5
+    driftPullInDistance: 1.8
+    driftPullInHeight: 0.45
+    speedForMaxOffset: 60
+    extraDistanceAtMaxSpeed: 6
+    extraHeightAtMaxSpeed: 2.4
+    nitrosShakePosition: 0.16
+    nitrosShakeRotation: 0.85
+    nitrosShakeFrequency: 30
+    nitrosShakeFadeSpeed: 10
     sideCorrectionStrength: 1.2
     sideCorrectionSpeed: 2.75
     maxSideOffset: 7.5
