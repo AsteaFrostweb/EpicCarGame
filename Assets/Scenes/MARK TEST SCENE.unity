@@ -133,11 +133,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5808438611904219538, guid: 3c17bc835e765aa4c84d4171b7b34330, type: 3}
       propertyPath: m_ForwardFriction.m_Stiffness
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5808438611904219538, guid: 3c17bc835e765aa4c84d4171b7b34330, type: 3}
       propertyPath: m_SidewaysFriction.m_Stiffness
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7564635755307864550, guid: 3c17bc835e765aa4c84d4171b7b34330, type: 3}
       propertyPath: maxSpeed
@@ -161,19 +161,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7564635755307864550, guid: 3c17bc835e765aa4c84d4171b7b34330, type: 3}
       propertyPath: rearForwardGrip
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7564635755307864550, guid: 3c17bc835e765aa4c84d4171b7b34330, type: 3}
       propertyPath: frontForwardGrip
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7564635755307864550, guid: 3c17bc835e765aa4c84d4171b7b34330, type: 3}
       propertyPath: rearSidewaysGrip
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7564635755307864550, guid: 3c17bc835e765aa4c84d4171b7b34330, type: 3}
       propertyPath: frontSidewaysGrip
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7564635755307864550, guid: 3c17bc835e765aa4c84d4171b7b34330, type: 3}
       propertyPath: nitrosDepletionRate
@@ -197,19 +197,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8165944833932307397, guid: 3c17bc835e765aa4c84d4171b7b34330, type: 3}
       propertyPath: m_ForwardFriction.m_Stiffness
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8165944833932307397, guid: 3c17bc835e765aa4c84d4171b7b34330, type: 3}
       propertyPath: m_SidewaysFriction.m_Stiffness
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8202064611474040987, guid: 3c17bc835e765aa4c84d4171b7b34330, type: 3}
       propertyPath: m_ForwardFriction.m_Stiffness
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8202064611474040987, guid: 3c17bc835e765aa4c84d4171b7b34330, type: 3}
       propertyPath: m_SidewaysFriction.m_Stiffness
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8536995660524687386, guid: 3c17bc835e765aa4c84d4171b7b34330, type: 3}
       propertyPath: m_LocalPosition.x
@@ -253,11 +253,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8668888872534599680, guid: 3c17bc835e765aa4c84d4171b7b34330, type: 3}
       propertyPath: m_ForwardFriction.m_Stiffness
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 8668888872534599680, guid: 3c17bc835e765aa4c84d4171b7b34330, type: 3}
       propertyPath: m_SidewaysFriction.m_Stiffness
-      value: 3
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1044,15 +1044,19 @@ PrefabInstance:
       objectReference: {fileID: 1280646624}
     - target: {fileID: 5986236349175801746, guid: 9e6e65014ac2827438a2b98c79b2a9b4, type: 3}
       propertyPath: responsiveTuning.height
-      value: 2.5
+      value: 1.57
       objectReference: {fileID: 0}
     - target: {fileID: 5986236349175801746, guid: 9e6e65014ac2827438a2b98c79b2a9b4, type: 3}
       propertyPath: responsiveTuning.distance
-      value: 5.5
+      value: 3.58
       objectReference: {fileID: 0}
     - target: {fileID: 5986236349175801746, guid: 9e6e65014ac2827438a2b98c79b2a9b4, type: 3}
       propertyPath: responsiveTuning.lookHeight
-      value: 1.4
+      value: 1.06
+      objectReference: {fileID: 0}
+    - target: {fileID: 5986236349175801746, guid: 9e6e65014ac2827438a2b98c79b2a9b4, type: 3}
+      propertyPath: responsiveTuning.movementSpeed
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 5986236349175801746, guid: 9e6e65014ac2827438a2b98c79b2a9b4, type: 3}
       propertyPath: responsiveTuning.nitrosShakePosition
@@ -1449,6 +1453,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: ba9f4f0e885dd8341809b309714144fa, type: 3}
       propertyPath: m_Name
       value: updated width track
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: ba9f4f0e885dd8341809b309714144fa, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
