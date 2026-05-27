@@ -398,7 +398,7 @@ RotationConstraint:
   m_Active: 1
   m_IsLocked: 1
   m_Sources:
-  - sourceTransform: {fileID: 8536995662500073061}
+  - sourceTransform: {fileID: 562448833}
     weight: 1
 --- !u!1 &393945275
 GameObject:
@@ -632,6 +632,11 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
+--- !u!4 &562448833 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8325305941170638129, guid: ba948590a0e1af140b2bc8a603156ed0, type: 3}
+  m_PrefabInstance: {fileID: 1775244008}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &749644954
 GameObject:
   m_ObjectHideFlags: 0
@@ -951,7 +956,7 @@ PrefabInstance:
     - target: {fileID: 5986236349175801746, guid: 9e6e65014ac2827438a2b98c79b2a9b4, type: 3}
       propertyPath: target
       value: 
-      objectReference: {fileID: 8536995662500073061}
+      objectReference: {fileID: 562448833}
     - target: {fileID: 5986236349175801746, guid: 9e6e65014ac2827438a2b98c79b2a9b4, type: 3}
       propertyPath: useGroundClearance
       value: 0
@@ -1338,7 +1343,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4880603186691663692, guid: ba948590a0e1af140b2bc8a603156ed0, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8325305941170638129, guid: ba948590a0e1af140b2bc8a603156ed0, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1399,7 +1404,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5065299758313749095, guid: 214369c562686fe46ab999be3e585a71, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8536995660524687386, guid: 214369c562686fe46ab999be3e585a71, type: 3}
       propertyPath: m_LocalPosition.x
