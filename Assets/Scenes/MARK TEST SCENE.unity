@@ -221,7 +221,8 @@ PrefabInstance:
       value: new track test
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: -1293269285077876327, guid: 0a32ed4c35942fe4ab2a8be2c90c1d70, type: 3}
     m_AddedGameObjects: []
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: -5560203614986472025, guid: 0a32ed4c35942fe4ab2a8be2c90c1d70, type: 3}
@@ -398,7 +399,7 @@ RotationConstraint:
   m_Active: 1
   m_IsLocked: 1
   m_Sources:
-  - sourceTransform: {fileID: 562448833}
+  - sourceTransform: {fileID: 8536995662500073061}
     weight: 1
 --- !u!1 &393945275
 GameObject:
@@ -632,11 +633,6 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!4 &562448833 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 8325305941170638129, guid: ba948590a0e1af140b2bc8a603156ed0, type: 3}
-  m_PrefabInstance: {fileID: 1775244008}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &749644954
 GameObject:
   m_ObjectHideFlags: 0
@@ -956,7 +952,7 @@ PrefabInstance:
     - target: {fileID: 5986236349175801746, guid: 9e6e65014ac2827438a2b98c79b2a9b4, type: 3}
       propertyPath: target
       value: 
-      objectReference: {fileID: 562448833}
+      objectReference: {fileID: 8536995662500073061}
     - target: {fileID: 5986236349175801746, guid: 9e6e65014ac2827438a2b98c79b2a9b4, type: 3}
       propertyPath: useGroundClearance
       value: 0
@@ -1185,7 +1181,7 @@ Light:
   serializedVersion: 11
   m_Type: 1
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 330.18515
+  m_Intensity: 9588.519
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
@@ -1228,7 +1224,7 @@ Light:
   m_LightShadowCasterMode: 2
   m_AreaSize: {x: 0.5, y: 0.5}
   m_BounceIntensity: 1
-  m_ColorTemperature: 4402
+  m_ColorTemperature: 6727
   m_UseColorTemperature: 1
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
@@ -1343,7 +1339,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4880603186691663692, guid: ba948590a0e1af140b2bc8a603156ed0, type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8325305941170638129, guid: ba948590a0e1af140b2bc8a603156ed0, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1404,7 +1400,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5065299758313749095, guid: 214369c562686fe46ab999be3e585a71, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8536995660524687386, guid: 214369c562686fe46ab999be3e585a71, type: 3}
       propertyPath: m_LocalPosition.x
