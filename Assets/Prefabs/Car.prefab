@@ -489,6 +489,7 @@ GameObject:
   - component: {fileID: 2043180739648238402}
   - component: {fileID: 649134695006814107}
   - component: {fileID: 1288988658918056966}
+  - component: {fileID: 5467344261434306402}
   m_Layer: 0
   m_Name: Car
   m_TagString: Untagged
@@ -573,6 +574,12 @@ MonoBehaviour:
   maxSpeed: 56
   reverseTorqueMultiplier: 0.45
   brakeResponseSpeed: 2.25
+  nitrosKey: 304
+  maxNitrosAmount: 100
+  nitrosAmount: 100
+  nitrosSpeed: 24
+  nitrosDepletionRate: 25
+  requireThrottleForNitros: 1
   throttleResponse: 8
   steerResponse: 5
   steerReturnResponse: 14
@@ -645,6 +652,40 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  minFrictionBySpeed: 0.55
+  frictionBySpeed:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.65
+      value: 0.86
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.65
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   applyCenterOfMassOffsetOnAwake: 0
   centerOfMassOffset: {x: 0, y: -0.45, z: -0.08}
   downforce: 8
@@ -671,12 +712,15 @@ MonoBehaviour:
   driftSteerMultiplier: 1.18
   driftThrottleMultiplier: 0.78
   driftYawTorque: 8
-  counterSteerAssist: 0.268
+  assistMode: 0
+  counterSteerAssist: 0.55
+  counterSteerFullSlipAngle: 35
+  driftRecoveryMinSlipAngle: 6
   enableDynamicTyreGrip: 1
-  frontSlideForwardGrip: 1.25
-  frontSlideSidewaysGrip: 0.95
-  frontSlipStartAngle: 5
-  frontSlipFullAngle: 24
+  frontSlideForwardGrip: 2
+  frontSlideSidewaysGrip: 1.35
+  frontSlipStartAngle: 9
+  frontSlipFullAngle: 42
   rearSlipStartAngle: 4
   rearSlipFullAngle: 34
   rearForwardSlipForFullSlide: 0.65
@@ -774,6 +818,19 @@ MonoBehaviour:
   carController: {fileID: 0}
   sfxController: {fileID: 0}
   engineRunning: 1
+--- !u!114 &5467344261434306402
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5065299758313749095}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a75f664cac2f4a4d8c350ed7328de83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  value: 5000
 --- !u!1 &5834107799051789524
 GameObject:
   m_ObjectHideFlags: 0

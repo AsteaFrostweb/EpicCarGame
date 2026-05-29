@@ -778,6 +778,40 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  minFrictionBySpeed: 0.55
+  frictionBySpeed:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.65
+      value: 0.86
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.65
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   applyCenterOfMassOffsetOnAwake: 0
   centerOfMassOffset: {x: 0, y: -0.45, z: 0.05}
   downforce: 3
@@ -804,7 +838,10 @@ MonoBehaviour:
   driftSteerMultiplier: 1.18
   driftThrottleMultiplier: 0.78
   driftYawTorque: 8
-  counterSteerAssist: 0.268
+  assistMode: 0
+  counterSteerAssist: 0.55
+  counterSteerFullSlipAngle: 35
+  driftRecoveryMinSlipAngle: 6
   enableDynamicTyreGrip: 1
   frontSlideForwardGrip: 1.25
   frontSlideSidewaysGrip: 0.95

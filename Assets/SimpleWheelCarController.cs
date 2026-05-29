@@ -2,6 +2,12 @@ using UnityEngine;
 
 public class SimpleWheelCarController : MonoBehaviour
 {
+    public enum AssistMode
+    {
+        Assisted,
+        Expert
+    }
+
     private const float PresetMotorTorque = 3000f;
     private const float PresetBrakeTorque = 6200f;
     private const float PresetHandbrakeTorque = 3600f;
@@ -55,6 +61,11 @@ public class SimpleWheelCarController : MonoBehaviour
         new Keyframe(0f, 1f),
         new Keyframe(0.7f, 0.9f),
         new Keyframe(1f, 0.12f));
+    [Range(0f, 1f)] public float minFrictionBySpeed = 0.55f;
+    public AnimationCurve frictionBySpeed = new AnimationCurve(
+        new Keyframe(0f, 1f),
+        new Keyframe(0.65f, 0.86f),
+        new Keyframe(1f, 0.65f));
 
     [Header("Rigidbody Setup")]
     public bool applyCenterOfMassOffsetOnAwake;
@@ -89,14 +100,17 @@ public class SimpleWheelCarController : MonoBehaviour
     public float driftSteerMultiplier = 1.18f;
     public float driftThrottleMultiplier = 0.78f;
     public float driftYawTorque = 8f;
-    [Range(0f, 1f)] public float counterSteerAssist = 0.18f;
+    public AssistMode assistMode = AssistMode.Assisted;
+    [Range(0f, 1f)] public float counterSteerAssist = 0.55f;
+    public float counterSteerFullSlipAngle = 35f;
+    public float driftRecoveryMinSlipAngle = 6f;
 
     [Header("Dynamic Tyre Grip")]
     public bool enableDynamicTyreGrip = true;
-    public float frontSlideForwardGrip = 1.25f;
-    public float frontSlideSidewaysGrip = 0.95f;
-    public float frontSlipStartAngle = 5f;
-    public float frontSlipFullAngle = 24f;
+    public float frontSlideForwardGrip = 1.4f;
+    public float frontSlideSidewaysGrip = 1.35f;
+    public float frontSlipStartAngle = 9f;
+    public float frontSlipFullAngle = 42f;
     public float rearSlipStartAngle = 4f;
     public float rearSlipFullAngle = 34f;
     public float rearForwardSlipForFullSlide = 0.65f;
@@ -149,7 +163,7 @@ public class SimpleWheelCarController : MonoBehaviour
     public float RearSlipAngle => rearSlipAngle;
     public float FrontSlideAmount => frontSlideAmount;
     public float RearSlideAmount => rearSlideAmount;
-    public float RecoveryAssist => 0f;
+    public float RecoveryAssist => GetDriftRecoveryAssistT();
     public float Speed01 => Mathf.Clamp01(speed / maxSpeed);
     public float ForwardSpeed01 => Mathf.Clamp01(Mathf.Abs(currentForwardVelocity) / maxSpeed);
     public float Throttle01 => Mathf.Clamp01(smoothedVerticalInput);
@@ -197,6 +211,7 @@ public class SimpleWheelCarController : MonoBehaviour
         steerResponse = Mathf.Max(0f, steerResponse);
         steerReturnResponse = Mathf.Max(0f, steerReturnResponse);
         steeringInputExponent = Mathf.Max(0.1f, steeringInputExponent);
+        minFrictionBySpeed = Mathf.Clamp01(minFrictionBySpeed);
         downforce = Mathf.Max(0f, downforce);
         groundedDownforceFadeSpeed = Mathf.Max(0f, groundedDownforceFadeSpeed);
         normalTurnYawTorque = Mathf.Max(0f, normalTurnYawTorque);
@@ -210,6 +225,9 @@ public class SimpleWheelCarController : MonoBehaviour
         driftBuildSpeed = Mathf.Max(0f, driftBuildSpeed);
         driftRecoverSpeed = Mathf.Max(0f, driftRecoverSpeed);
         driftYawTorque = Mathf.Max(0f, driftYawTorque);
+        counterSteerAssist = Mathf.Clamp01(counterSteerAssist);
+        counterSteerFullSlipAngle = Mathf.Max(1f, counterSteerFullSlipAngle);
+        driftRecoveryMinSlipAngle = Mathf.Max(0f, driftRecoveryMinSlipAngle);
         frontSlideForwardGrip = Mathf.Max(0f, frontSlideForwardGrip);
         frontSlideSidewaysGrip = Mathf.Max(0f, frontSlideSidewaysGrip);
         frontSlipStartAngle = Mathf.Max(0f, frontSlipStartAngle);
@@ -261,6 +279,11 @@ public class SimpleWheelCarController : MonoBehaviour
             new Keyframe(0f, 1f),
             new Keyframe(0.7f, 0.9f),
             new Keyframe(1f, 0.12f));
+        minFrictionBySpeed = 0.55f;
+        frictionBySpeed = new AnimationCurve(
+            new Keyframe(0f, 1f),
+            new Keyframe(0.65f, 0.86f),
+            new Keyframe(1f, 0.65f));
 
         applyCenterOfMassOffsetOnAwake = false;
         centerOfMassOffset = PresetCenterOfMassOffset;
@@ -290,13 +313,16 @@ public class SimpleWheelCarController : MonoBehaviour
         driftSteerMultiplier = 1.18f;
         driftThrottleMultiplier = 0.78f;
         driftYawTorque = 8f;
-        counterSteerAssist = 0.18f;
+        assistMode = AssistMode.Assisted;
+        counterSteerAssist = 0.55f;
+        counterSteerFullSlipAngle = 35f;
+        driftRecoveryMinSlipAngle = 6f;
 
         enableDynamicTyreGrip = true;
-        frontSlideForwardGrip = 1.25f;
-        frontSlideSidewaysGrip = 0.95f;
-        frontSlipStartAngle = 5f;
-        frontSlipFullAngle = 24f;
+        frontSlideForwardGrip = 1.4f;
+        frontSlideSidewaysGrip = 1.35f;
+        frontSlipStartAngle = 9f;
+        frontSlipFullAngle = 42f;
         rearSlipStartAngle = 4f;
         rearSlipFullAngle = 34f;
         rearForwardSlipForFullSlide = 0.65f;
@@ -467,13 +493,36 @@ public class SimpleWheelCarController : MonoBehaviour
 
     private float GetSteerInputWithAssist()
     {
-        if (driftAmount <= 0.01f || counterSteerAssist <= 0f)
+        if (assistMode == AssistMode.Expert || driftAmount <= 0.01f || counterSteerAssist <= 0f)
         {
             return Mathf.Clamp(smoothedSteerInput, -1f, 1f);
         }
 
-        float counterInput = Mathf.Clamp(-slipAngle / 45f, -1f, 1f);
-        return Mathf.Clamp(smoothedSteerInput + counterInput * counterSteerAssist * driftAmount, -1f, 1f);
+        float recoveryT = GetDriftRecoveryAssistT();
+        float counterInput = GetCounterSteerInput();
+        float assistT = counterSteerAssist * recoveryT;
+
+        return Mathf.Clamp(Mathf.Lerp(smoothedSteerInput, counterInput, assistT), -1f, 1f);
+    }
+
+    private float GetDriftRecoveryAssistT()
+    {
+        if (assistMode == AssistMode.Expert || driftAmount <= 0.01f)
+        {
+            return 0f;
+        }
+
+        float slipT = Mathf.InverseLerp(
+            driftRecoveryMinSlipAngle,
+            counterSteerFullSlipAngle,
+            Mathf.Abs(slipAngle));
+
+        return Mathf.Clamp01(slipT * driftAmount * Speed01);
+    }
+
+    private float GetCounterSteerInput()
+    {
+        return Mathf.Clamp(slipAngle / Mathf.Max(1f, counterSteerFullSlipAngle), -1f, 1f);
     }
 
     private float ShapeSteeringInput(float input)
@@ -611,9 +660,11 @@ public class SimpleWheelCarController : MonoBehaviour
             rb.AddTorque(transform.up * -yawRate * straightLineYawDamping * speedT * straightLineT * stabilityT, ForceMode.Acceleration);
         }
 
-        if (stabilityAssist > 0f && slideT < 0.85f && Mathf.Abs(slipAngle) > 1f)
+        bool allowSlipStabilityTorque = !(assistMode == AssistMode.Assisted && driftAmount > 0.01f);
+
+        if (allowSlipStabilityTorque && stabilityAssist > 0f && slideT < 0.85f && Mathf.Abs(slipAngle) > 1f)
         {
-            float stabilityTorque = Mathf.Clamp(-slipAngle / 45f, -1f, 1f) * stabilityAssist * speedT * stabilityT;
+            float stabilityTorque = Mathf.Clamp(slipAngle / 45f, -1f, 1f) * stabilityAssist * speedT * stabilityT;
             rb.AddTorque(transform.up * stabilityTorque, ForceMode.Acceleration);
         }
 
@@ -634,12 +685,14 @@ public class SimpleWheelCarController : MonoBehaviour
             return;
         }
 
+        float speedFriction = GetFrictionBySpeedMultiplier();
+
         WheelFrictionCurve forwardFriction = wheel.forwardFriction;
         forwardFriction.extremumSlip = 0.34f;
         forwardFriction.extremumValue = 1f;
         forwardFriction.asymptoteSlip = 0.82f;
         forwardFriction.asymptoteValue = 0.78f;
-        forwardFriction.stiffness = forwardStiffness;
+        forwardFriction.stiffness = forwardStiffness * speedFriction;
         wheel.forwardFriction = forwardFriction;
 
         WheelFrictionCurve sidewaysFriction = wheel.sidewaysFriction;
@@ -647,8 +700,14 @@ public class SimpleWheelCarController : MonoBehaviour
         sidewaysFriction.extremumValue = 1f;
         sidewaysFriction.asymptoteSlip = 0.72f;
         sidewaysFriction.asymptoteValue = 0.72f;
-        sidewaysFriction.stiffness = sidewaysStiffness;
+        sidewaysFriction.stiffness = sidewaysStiffness * speedFriction;
         wheel.sidewaysFriction = sidewaysFriction;
+    }
+
+    private float GetFrictionBySpeedMultiplier()
+    {
+        float curveValue = EvaluateCurve(frictionBySpeed, Speed01, 1f);
+        return Mathf.Max(minFrictionBySpeed, curveValue);
     }
 
     private void InitializeCurrentGrip()
