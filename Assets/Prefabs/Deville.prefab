@@ -864,7 +864,7 @@ MonoBehaviour:
   suspensionTargetPosition: 0.5
   isBraking: 0
   isHandbraking: 0
-  currentForwardVelocity: -0.76236355
+  currentForwardVelocity: -0.7
 --- !u!114 &2941601519972315293
 MonoBehaviour:
   m_ObjectHideFlags: 0

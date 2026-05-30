@@ -134,6 +134,11 @@ public class SimpleWheelCarController : MonoBehaviour
     private float verticalInput;
     private float horizontalInput;
     private bool nitrosInput;
+    private bool usesExternalInput;
+    private float externalVerticalInput;
+    private float externalHorizontalInput;
+    private bool externalNitrosInput;
+    private bool externalHandbrakeInput;
     private float smoothedVerticalInput;
     private float smoothedSteerInput;
     private float currentSteerAngle;
@@ -360,6 +365,24 @@ public class SimpleWheelCarController : MonoBehaviour
         ApplyWheelColliderDefaults(rearRightCollider);
     }
 
+    public void SetExternalInput(float vertical, float horizontal, bool nitros = false, bool handbrake = false)
+    {
+        usesExternalInput = true;
+        externalVerticalInput = Mathf.Clamp(vertical, -1f, 1f);
+        externalHorizontalInput = Mathf.Clamp(horizontal, -1f, 1f);
+        externalNitrosInput = nitros;
+        externalHandbrakeInput = handbrake;
+    }
+
+    public void ClearExternalInput()
+    {
+        usesExternalInput = false;
+        externalVerticalInput = 0f;
+        externalHorizontalInput = 0f;
+        externalNitrosInput = false;
+        externalHandbrakeInput = false;
+    }
+
     private void Update()
     {
         GetInput();
@@ -380,12 +403,23 @@ public class SimpleWheelCarController : MonoBehaviour
 
     private void GetInput()
     {
-        verticalInput = Input.GetAxis("Vertical");
-        horizontalInput = Input.GetAxis("Horizontal");
-        nitrosInput = Input.GetKey(nitrosKey);
+        if (usesExternalInput)
+        {
+            verticalInput = externalVerticalInput;
+            horizontalInput = externalHorizontalInput;
+            nitrosInput = externalNitrosInput;
+            isHandbraking = externalHandbrakeInput;
+        }
+        else
+        {
+            verticalInput = Input.GetAxis("Vertical");
+            horizontalInput = Input.GetAxis("Horizontal");
+            nitrosInput = Input.GetKey(nitrosKey);
+            isHandbraking = Input.GetKey(KeyCode.Space);
+        }
+
         currentForwardVelocity = forwardVelocity;
         isBraking = verticalInput < -0.01f && currentForwardVelocity > brakeResponseSpeed;
-        isHandbraking = Input.GetKey(KeyCode.Space);
     }
 
     private void SmoothInputs()
