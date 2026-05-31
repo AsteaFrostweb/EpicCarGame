@@ -1700,7 +1700,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -449, y: 0, z: -548}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -3608,6 +3608,50 @@ PrefabInstance:
       propertyPath: m_Name
       value: Beemer
       objectReference: {fileID: 0}
+    - target: {fileID: 5808438611904219538, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
+      propertyPath: m_ForwardFriction.m_Stiffness
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5808438611904219538, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
+      propertyPath: m_SidewaysFriction.m_Stiffness
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7564635755307864550, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
+      propertyPath: maxSteerAngle
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 7564635755307864550, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
+      propertyPath: rearForwardGrip
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7564635755307864550, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
+      propertyPath: frontForwardGrip
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7564635755307864550, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
+      propertyPath: rearSidewaysGrip
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7564635755307864550, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
+      propertyPath: frontSidewaysGrip
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8165944833932307397, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
+      propertyPath: m_ForwardFriction.m_Stiffness
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8165944833932307397, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
+      propertyPath: m_SidewaysFriction.m_Stiffness
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8202064611474040987, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
+      propertyPath: m_ForwardFriction.m_Stiffness
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8202064611474040987, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
+      propertyPath: m_SidewaysFriction.m_Stiffness
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 8536995660524687386, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
       propertyPath: m_LocalPosition.x
       value: -111.99501
@@ -3647,6 +3691,14 @@ PrefabInstance:
     - target: {fileID: 8536995660524687386, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8668888872534599680, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
+      propertyPath: m_ForwardFriction.m_Stiffness
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8668888872534599680, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
+      propertyPath: m_SidewaysFriction.m_Stiffness
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
