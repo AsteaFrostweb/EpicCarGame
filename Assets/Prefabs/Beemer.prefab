@@ -382,13 +382,13 @@ WheelCollider:
     m_ExtremumValue: 1
     m_AsymptoteSlip: 0.82
     m_AsymptoteValue: 0.78
-    m_Stiffness: 2
+    m_Stiffness: 2.0208342
   m_SidewaysFriction:
     m_ExtremumSlip: 0.26
     m_ExtremumValue: 1
     m_AsymptoteSlip: 0.72
     m_AsymptoteValue: 0.72
-    m_Stiffness: 2
+    m_Stiffness: 2.0208342
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -453,13 +453,13 @@ WheelCollider:
     m_ExtremumValue: 1
     m_AsymptoteSlip: 0.82
     m_AsymptoteValue: 0.78
-    m_Stiffness: 2
+    m_Stiffness: 2.0208342
   m_SidewaysFriction:
     m_ExtremumSlip: 0.26
     m_ExtremumValue: 1
     m_AsymptoteSlip: 0.72
     m_AsymptoteValue: 0.72
-    m_Stiffness: 2
+    m_Stiffness: 2.0208342
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -524,13 +524,13 @@ WheelCollider:
     m_ExtremumValue: 1
     m_AsymptoteSlip: 0.82
     m_AsymptoteValue: 0.78
-    m_Stiffness: 2
+    m_Stiffness: 2.0208342
   m_SidewaysFriction:
     m_ExtremumSlip: 0.26
     m_ExtremumValue: 1
     m_AsymptoteSlip: 0.72
     m_AsymptoteValue: 0.72
-    m_Stiffness: 2
+    m_Stiffness: 2.0208342
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -670,12 +670,12 @@ MonoBehaviour:
   motorTorque: 2400
   brakeTorque: 3200
   handbrakeTorque: 3600
-  maxSpeed: 25
+  maxSpeed: 32
   reverseTorqueMultiplier: 0.45
   brakeResponseSpeed: 2.25
   nitrosKey: 304
   maxNitrosAmount: 100
-  nitrosAmount: 94.25116
+  nitrosAmount: 100
   nitrosSpeed: 3
   nitrosDepletionRate: 0.1
   requireThrottleForNitros: 1
@@ -765,8 +765,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
-      time: 0
-      value: 1
+      time: -0.0083351135
+      value: 1.010395
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -814,9 +814,9 @@ MonoBehaviour:
   enableDrift: 1
   driftEnterSpeed: 8
   driftBuildSpeed: 6
-  driftRecoverSpeed: 4
-  driftRearSidewaysGrip: 0.975
-  driftRearForwardGrip: 0.975
+  driftRecoverSpeed: 2
+  driftRearSidewaysGrip: 2
+  driftRearForwardGrip: 1.5
   driftSteerMultiplier: 1.18
   driftThrottleMultiplier: 0.9
   driftYawTorque: 8
@@ -846,7 +846,7 @@ MonoBehaviour:
   suspensionTargetPosition: 0.3
   isBraking: 0
   isHandbraking: 0
-  currentForwardVelocity: -0.804318
+  currentForwardVelocity: -1.5375056
 --- !u!114 &3252239985499057590
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1143,13 +1143,13 @@ WheelCollider:
     m_ExtremumValue: 1
     m_AsymptoteSlip: 0.82
     m_AsymptoteValue: 0.78
-    m_Stiffness: 2
+    m_Stiffness: 2.0208342
   m_SidewaysFriction:
     m_ExtremumSlip: 0.26
     m_ExtremumValue: 1
     m_AsymptoteSlip: 0.72
     m_AsymptoteValue: 0.72
-    m_Stiffness: 2
+    m_Stiffness: 2.0208342
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
