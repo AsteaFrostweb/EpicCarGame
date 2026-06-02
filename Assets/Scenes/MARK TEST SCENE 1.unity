@@ -4806,7 +4806,7 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 1
-  m_Color: {r: 0.0993236, g: 0.15365641, b: 0.6792453, a: 1}
+  m_Color: {r: 0.9811321, g: 0.9811321, b: 0.9811321, a: 1}
   m_Intensity: 130000
   m_Range: 10
   m_SpotAngle: 30
@@ -4850,7 +4850,7 @@ Light:
   m_LightShadowCasterMode: 2
   m_AreaSize: {x: 0.5, y: 0.5}
   m_BounceIntensity: 1
-  m_ColorTemperature: 1832
+  m_ColorTemperature: 7563
   m_UseColorTemperature: 1
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
@@ -6110,7 +6110,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f427e614a9ba7c6488483f0c8274edba, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 469.55
+      value: 471.82
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f427e614a9ba7c6488483f0c8274edba, type: 3}
       propertyPath: m_LocalRotation.w
