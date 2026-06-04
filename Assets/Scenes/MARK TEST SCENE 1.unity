@@ -4440,11 +4440,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5986236349175801746, guid: 9e6e65014ac2827438a2b98c79b2a9b4, type: 3}
       propertyPath: responsiveTuning.movementSpeed
-      value: 15
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 5986236349175801746, guid: 9e6e65014ac2827438a2b98c79b2a9b4, type: 3}
       propertyPath: responsiveTuning.rotationSpeed
-      value: 5
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 5986236349175801746, guid: 9e6e65014ac2827438a2b98c79b2a9b4, type: 3}
       propertyPath: cinematicDriftTuning.movementSpeed
@@ -4484,7 +4484,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5986236349175801746, guid: 9e6e65014ac2827438a2b98c79b2a9b4, type: 3}
       propertyPath: responsiveTuning.positionSlowdownDistance
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5669,67 +5669,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 25.499664, y: 12.527776, z: 3.421251}
   m_Center: {x: -1.3572444, y: 3.3686316, z: -1.2106171}
---- !u!1001 &1775244008
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 4880603186691663692, guid: ba948590a0e1af140b2bc8a603156ed0, type: 3}
-      propertyPath: m_Name
-      value: Deville
-      objectReference: {fileID: 0}
-    - target: {fileID: 4880603186691663692, guid: ba948590a0e1af140b2bc8a603156ed0, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8325305941170638129, guid: ba948590a0e1af140b2bc8a603156ed0, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -4.22614
-      objectReference: {fileID: 0}
-    - target: {fileID: 8325305941170638129, guid: ba948590a0e1af140b2bc8a603156ed0, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -1.1269503
-      objectReference: {fileID: 0}
-    - target: {fileID: 8325305941170638129, guid: ba948590a0e1af140b2bc8a603156ed0, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -3.180162
-      objectReference: {fileID: 0}
-    - target: {fileID: 8325305941170638129, guid: ba948590a0e1af140b2bc8a603156ed0, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0.7071068
-      objectReference: {fileID: 0}
-    - target: {fileID: 8325305941170638129, guid: ba948590a0e1af140b2bc8a603156ed0, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8325305941170638129, guid: ba948590a0e1af140b2bc8a603156ed0, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0.7071068
-      objectReference: {fileID: 0}
-    - target: {fileID: 8325305941170638129, guid: ba948590a0e1af140b2bc8a603156ed0, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8325305941170638129, guid: ba948590a0e1af140b2bc8a603156ed0, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8325305941170638129, guid: ba948590a0e1af140b2bc8a603156ed0, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: -90
-      objectReference: {fileID: 0}
-    - target: {fileID: 8325305941170638129, guid: ba948590a0e1af140b2bc8a603156ed0, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: ba948590a0e1af140b2bc8a603156ed0, type: 3}
 --- !u!1001 &1791418129
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6896,6 +6835,10 @@ PrefabInstance:
     - target: {fileID: 5065299758313749095, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
       propertyPath: m_Name
       value: Beemer
+      objectReference: {fileID: 0}
+    - target: {fileID: 7564635755307864550, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
+      propertyPath: maxSpeed
+      value: 40
       objectReference: {fileID: 0}
     - target: {fileID: 8536995660524687386, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
       propertyPath: m_LocalPosition.x
@@ -9377,7 +9320,6 @@ SceneRoots:
   - {fileID: 1397982087}
   - {fileID: 126455604}
   - {fileID: 302493764}
-  - {fileID: 1775244008}
   - {fileID: 543450653326571583}
   - {fileID: 635961698}
   - {fileID: 2063474303}
