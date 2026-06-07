@@ -1521,6 +1521,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Beemer
       objectReference: {fileID: 0}
+    - target: {fileID: 5065299758313749095, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 7564635755307864550, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
       propertyPath: maxSpeed
       value: 40
