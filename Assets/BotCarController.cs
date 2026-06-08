@@ -2,88 +2,77 @@ using UnityEngine;
 using UnityEngine.Serialization;
 
 [RequireComponent(typeof(SimpleWheelCarController))]
-[RequireComponent(typeof(PlayerRaceController))]
 public class BotCarController : MonoBehaviour
 {
     [SerializeField] private SimpleWheelCarController carController;
-    [SerializeField] private PlayerRaceController raceController;
-    [SerializeField] private Rigidbody carRigidbody;
     [SerializeField] private RacingLineController racingLine;
 
     [Header("Path Following")]
     [FormerlySerializedAs("lookAheadDistance")]
-    [SerializeField] private float baseLookAheadDistance = 10f;
-    [SerializeField] private float speedLookAheadDistance = 14f;
-    [SerializeField] private float lateralErrorLookAheadMultiplier = 1.2f;
-    [SerializeField] private float maxLateralErrorLookAhead = 18f;
-    [SerializeField] private bool fallbackToCheckpoints = true;
-    [SerializeField] private bool useDistanceCheckpointCompletion;
-    [SerializeField] private float checkpointReachDistance = 8f;
+    [Tooltip("Distance to the first racing-line sample the bot aims toward. Lower values react earlier but can twitch; higher values smooth out straights but can turn late.")]
+    [SerializeField] private float lookAheadDistance = 12f;
+    [Tooltip("How many racing-line samples are blended into the movement direction.")]
+    [SerializeField] private int pathSampleCount = 4;
+    [Tooltip("Each extra sample is this many times farther than the previous one. 2 means octave-style distances: 12, 24, 48, etc.")]
+    [SerializeField] private float pathSampleDistanceMultiplier = 1.6f;
+    [Tooltip("Weight falloff for farther samples. Lower values favor near samples and earlier corner reaction; higher values favor smoother long-range direction.")]
     [Range(0f, 1f)]
-    [SerializeField] private float forwardAlignmentWeight = 0.65f;
-    [SerializeField] private float steerAngleForFullInput = 45f;
+    [SerializeField] private float pathSampleWeightFalloff = 0.55f;
 
-    [Header("Driving")]
-    [SerializeField] private float maxThrottle = 1f;
-    [SerializeField] private float cautiousThrottle = 0.45f;
-    [SerializeField] private float speedLimitBrakeMargin = 4f;
-    [SerializeField] private float speedLimitBrakeInput = 0.25f;
-    [SerializeField] private float steeringAngleForCaution = 45f;
-    [SerializeField] private float brakeAngle = 80f;
-    [SerializeField] private float wrongWayBrakeAngle = 120f;
-    [SerializeField] private float handbrakeAngle = 65f;
-    [SerializeField] private float nitrosMaxSteeringAngle = 10f;
-    [SerializeField] private float nitrosMinSpeed01 = 0.35f;
-
-    [Header("Steering Assist")]
-    [SerializeField] private float headingSteerGain = 1f;
-    [SerializeField] private float lateralSteerGain = 0.035f;
-    [SerializeField] private float yawDampingGain = 0.18f;
-    [SerializeField] private float steerSmoothing = 8f;
-    [SerializeField] private float lateralErrorLookAhead = 5f;
-
-    [Header("Obstacle Avoidance")]
-    [SerializeField] private bool enableObstacleAvoidance = true;
+    [Header("Collision Avoidance")]
+    [Tooltip("Layers considered by the simple obstacle avoidance rays.")]
     [SerializeField] private LayerMask obstacleLayers = ~0;
-    [SerializeField] private float avoidanceRayOriginHeight = 0.75f;
-    [SerializeField] private float avoidanceRayForwardOffset = 1.8f;
-    [SerializeField] private float forwardAvoidanceRayLength = 14f;
-    [SerializeField] private float sideAvoidanceRayLength = 4f;
-    [SerializeField] private float forwardAvoidanceSteerGain = 1.15f;
-    [SerializeField] private float sideAvoidanceSteerGain = 0.85f;
-    [SerializeField] private float avoidanceBrakeDistance = 5f;
-    [SerializeField] private float avoidanceBrakeInput = 0.35f;
+    [Tooltip("How strongly the avoidance direction is added to the racing-line direction. 0 disables avoidance.")]
+    [SerializeField] private float collisionAvoidanceWeight = 1.5f;
+    [Tooltip("How far ahead the bot checks for obstacles.")]
+    [SerializeField] private float avoidanceRayDistance = 12f;
+    [Tooltip("Height above the car origin where avoidance rays are cast.")]
+    [SerializeField] private float avoidanceRayHeight = 0.75f;
+    [Tooltip("Forward offset from the car origin where avoidance rays start.")]
+    [SerializeField] private float avoidanceRayForwardOffset = 1.5f;
+    [Tooltip("Angle of the left and right feeler rays.")]
+    [SerializeField] private float avoidanceRayAngle = 35f;
+
+    [Header("Steering PID")]
+    [Tooltip("Heading error, in degrees, that maps to full steering input before PID gains. Lower values make steering more sensitive.")]
+    [SerializeField] private float steerAngleForFullInput = 45f;
+    [Tooltip("Immediate steering response to heading error. Raise if the bot understeers; lower if it oscillates.")]
+    [SerializeField] private float proportionalGain = 1f;
+    [Tooltip("Long-term correction for persistent bias. Usually keep this at 0 or very small for vehicle steering.")]
+    [SerializeField] private float integralGain;
+    [Tooltip("Damps rapid changes in heading error. Raise to reduce weaving, lower if steering feels sluggish or noisy.")]
+    [SerializeField] private float derivativeGain = 0.08f;
+    [Tooltip("Caps accumulated integral correction so it cannot wind up too far.")]
+    [SerializeField] private float integralLimit = 1f;
+
+    [Header("Speed")]
+    [Tooltip("Throttle sent when below the desired racing-line speed.")]
+    [SerializeField] private float maxThrottle = 1f;
+    [Tooltip("How far above desired speed the bot can be before braking.")]
+    [SerializeField] private float speedBrakeMargin = 4f;
+    [Tooltip("Reverse/brake input sent when the bot exceeds desired speed by more than the brake margin.")]
+    [SerializeField] private float speedBrakeInput = 0.35f;
 
     public float currentSteerInput;
     public float currentThrottleInput;
-    public bool currentHandbrakeInput;
-    public bool currentNitrosInput;
     public float segmentProgress;
     public float currentDesiredSpeed;
-    public float currentObstacleAvoidanceSteer;
-    public float currentObstacleBrakeInput;
+    public float currentHeadingError;
     public Vector3 currentAimPoint;
+    public Vector3 currentPathDirection;
+    public Vector3 currentAvoidanceDirection;
+    public Vector3 currentMovementDirection;
 
-    private readonly float[] forwardAvoidanceAngles = { -60f, -30f, 0f, 30f, 60f };
-    private readonly RaycastHit[] obstacleHits = new RaycastHit[12];
-
-    private float smoothedSteerInput;
+    private float steeringIntegral;
+    private float previousHeadingError;
+    private bool hasPreviousHeadingError;
+    private readonly RaycastHit[] avoidanceHits = new RaycastHit[8];
 
     private void Awake()
     {
         if (carController == null)
         {
             carController = GetComponent<SimpleWheelCarController>();
-        }
-
-        if (raceController == null)
-        {
-            raceController = GetComponent<PlayerRaceController>();
-        }
-
-        if (carRigidbody == null)
-        {
-            carRigidbody = GetComponent<Rigidbody>();
         }
 
         if (racingLine == null)
@@ -94,93 +83,44 @@ public class BotCarController : MonoBehaviour
 
     private void OnValidate()
     {
-        baseLookAheadDistance = Mathf.Max(0f, baseLookAheadDistance);
-        speedLookAheadDistance = Mathf.Max(0f, speedLookAheadDistance);
-        lateralErrorLookAheadMultiplier = Mathf.Max(0f, lateralErrorLookAheadMultiplier);
-        maxLateralErrorLookAhead = Mathf.Max(0f, maxLateralErrorLookAhead);
-        checkpointReachDistance = Mathf.Max(0.1f, checkpointReachDistance);
-        steerAngleForFullInput = Mathf.Max(1f, steerAngleForFullInput);
-        maxThrottle = Mathf.Clamp(maxThrottle, -1f, 1f);
-        cautiousThrottle = Mathf.Clamp(cautiousThrottle, -1f, 1f);
-        speedLimitBrakeMargin = Mathf.Max(0f, speedLimitBrakeMargin);
-        speedLimitBrakeInput = Mathf.Clamp01(speedLimitBrakeInput);
-        steeringAngleForCaution = Mathf.Max(1f, steeringAngleForCaution);
-        brakeAngle = Mathf.Max(steeringAngleForCaution, brakeAngle);
-        wrongWayBrakeAngle = Mathf.Max(brakeAngle, wrongWayBrakeAngle);
-        handbrakeAngle = Mathf.Max(0f, handbrakeAngle);
-        nitrosMaxSteeringAngle = Mathf.Max(0f, nitrosMaxSteeringAngle);
-        nitrosMinSpeed01 = Mathf.Clamp01(nitrosMinSpeed01);
-        headingSteerGain = Mathf.Max(0f, headingSteerGain);
-        lateralSteerGain = Mathf.Max(0f, lateralSteerGain);
-        yawDampingGain = Mathf.Max(0f, yawDampingGain);
-        steerSmoothing = Mathf.Max(0f, steerSmoothing);
-        lateralErrorLookAhead = Mathf.Max(0f, lateralErrorLookAhead);
-        avoidanceRayOriginHeight = Mathf.Max(0f, avoidanceRayOriginHeight);
+        lookAheadDistance = Mathf.Max(0f, lookAheadDistance);
+        pathSampleCount = Mathf.Max(1, pathSampleCount);
+        pathSampleDistanceMultiplier = Mathf.Max(1f, pathSampleDistanceMultiplier);
+        pathSampleWeightFalloff = Mathf.Clamp01(pathSampleWeightFalloff);
+        collisionAvoidanceWeight = Mathf.Max(0f, collisionAvoidanceWeight);
+        avoidanceRayDistance = Mathf.Max(0f, avoidanceRayDistance);
+        avoidanceRayHeight = Mathf.Max(0f, avoidanceRayHeight);
         avoidanceRayForwardOffset = Mathf.Max(0f, avoidanceRayForwardOffset);
-        forwardAvoidanceRayLength = Mathf.Max(0f, forwardAvoidanceRayLength);
-        sideAvoidanceRayLength = Mathf.Max(0f, sideAvoidanceRayLength);
-        forwardAvoidanceSteerGain = Mathf.Max(0f, forwardAvoidanceSteerGain);
-        sideAvoidanceSteerGain = Mathf.Max(0f, sideAvoidanceSteerGain);
-        avoidanceBrakeDistance = Mathf.Max(0f, avoidanceBrakeDistance);
-        avoidanceBrakeInput = Mathf.Clamp01(avoidanceBrakeInput);
+        avoidanceRayAngle = Mathf.Max(0f, avoidanceRayAngle);
+        steerAngleForFullInput = Mathf.Max(1f, steerAngleForFullInput);
+        proportionalGain = Mathf.Max(0f, proportionalGain);
+        integralGain = Mathf.Max(0f, integralGain);
+        derivativeGain = Mathf.Max(0f, derivativeGain);
+        integralLimit = Mathf.Max(0f, integralLimit);
+        maxThrottle = Mathf.Clamp(maxThrottle, -1f, 1f);
+        speedBrakeMargin = Mathf.Max(0f, speedBrakeMargin);
+        speedBrakeInput = Mathf.Clamp01(speedBrakeInput);
     }
 
     private void FixedUpdate()
     {
-        if (carController == null)
+        if (carController == null || !TryGetMovementDirection(out Vector3 movementDirection, out currentDesiredSpeed))
         {
-            return;
-        }
-
-        float speed01 = carController.Speed01;
-        float lookAheadDistance = baseLookAheadDistance + speedLookAheadDistance * speed01;
-        bool hasAimDirection = TryGetRacingLineAimDirection(
-            lookAheadDistance,
-            out Vector3 directionToAimPoint,
-            out float lateralError,
-            out currentDesiredSpeed);
-
-        if (hasAimDirection)
-        {
-            float extraLookAhead = Mathf.Min(
-                Mathf.Abs(lateralError) * lateralErrorLookAheadMultiplier,
-                maxLateralErrorLookAhead);
-
-            if (extraLookAhead > 0.001f)
-            {
-                hasAimDirection = TryGetRacingLineAimDirection(
-                    lookAheadDistance + extraLookAhead,
-                    out directionToAimPoint,
-                    out lateralError,
-                    out currentDesiredSpeed);
-            }
-        }
-
-        if (!hasAimDirection && fallbackToCheckpoints)
-        {
-            hasAimDirection = TryGetCheckpointAimDirection(lookAheadDistance, out directionToAimPoint);
-            lateralError = 0f;
-            currentDesiredSpeed = 0f;
-        }
-
-        if (!hasAimDirection)
-        {
+            ResetPid();
             SetBotInput(0f, 0f);
             return;
         }
 
-        DriveToward(directionToAimPoint, lateralError, speed01, currentDesiredSpeed);
-        CompleteCheckpointByDistanceIfNeeded();
+        currentHeadingError = Vector3.SignedAngle(transform.forward, movementDirection, Vector3.up);
+        currentSteerInput = CalculatePidSteer(currentHeadingError);
+        currentThrottleInput = CalculateThrottle(currentDesiredSpeed);
+
+        SetBotInput(currentThrottleInput, currentSteerInput);
     }
 
-    private bool TryGetRacingLineAimDirection(
-        float lookAheadDistance,
-        out Vector3 directionToAimPoint,
-        out float lateralError,
-        out float desiredSpeed)
+    private bool TryGetMovementDirection(out Vector3 movementDirection, out float desiredSpeed)
     {
-        directionToAimPoint = Vector3.zero;
-        lateralError = 0f;
+        movementDirection = Vector3.zero;
         desiredSpeed = 0f;
 
         if (racingLine == null || racingLine.SampleCount < 2)
@@ -199,265 +139,80 @@ public class BotCarController : MonoBehaviour
             ? closestSampleIndex / (float)(racingLine.SampleCount - 1)
             : 0f;
 
-        Vector3 closestPoint = racingLine.GetSampleWorldPoint(closestSampleIndex);
-        Vector3 tangentPoint = racingLine.GetPointAheadByDistance(closestSampleIndex, lateralErrorLookAhead);
-        Vector3 pathForward = tangentPoint - closestPoint;
-        pathForward.y = 0f;
-
-        if (pathForward.sqrMagnitude > 0.001f)
-        {
-            Vector3 toCar = transform.position - closestPoint;
-            toCar.y = 0f;
-            float side = Mathf.Sign(Vector3.SignedAngle(pathForward.normalized, toCar.normalized, Vector3.up));
-            lateralError = toCar.magnitude * side;
-        }
-
-        currentAimPoint = racingLine.GetPointAheadByDistance(closestSampleIndex, lookAheadDistance);
-        directionToAimPoint = currentAimPoint - transform.position;
-        directionToAimPoint.y = 0f;
-
-        return directionToAimPoint.sqrMagnitude >= 0.001f;
-    }
-
-    private bool TryGetCheckpointAimDirection(float lookAheadDistance, out Vector3 directionToAimPoint)
-    {
-        directionToAimPoint = Vector3.zero;
-
-        if (raceController == null)
+        currentPathDirection = GetWeightedPathDirection(closestSampleIndex);
+        if (currentPathDirection.sqrMagnitude <= 0.001f)
         {
             return false;
         }
 
-        Transform previousCheckpoint = raceController.PreviousCheckpointTransform;
-        Transform nextCheckpoint = raceController.NextCheckpointTransform;
-        if (previousCheckpoint == null || nextCheckpoint == null)
+        currentAvoidanceDirection = GetCollisionAvoidanceDirection();
+        movementDirection = currentPathDirection + currentAvoidanceDirection * collisionAvoidanceWeight;
+        movementDirection.y = 0f;
+
+        if (movementDirection.sqrMagnitude <= 0.001f)
         {
             return false;
         }
 
-        Vector3 previousPosition = previousCheckpoint.position;
-        Vector3 nextPosition = nextCheckpoint.position;
-        Vector3 segment = nextPosition - previousPosition;
-        float segmentLengthSquared = segment.sqrMagnitude;
+        currentMovementDirection = movementDirection.normalized;
+        currentAimPoint = transform.position + currentMovementDirection * lookAheadDistance;
 
-        segmentProgress = segmentLengthSquared > 0.001f
-            ? Mathf.Clamp01(Vector3.Dot(transform.position - previousPosition, segment) / segmentLengthSquared)
-            : 1f;
-
-        Vector3 blendedForward = Vector3.Slerp(
-            previousCheckpoint.forward,
-            nextCheckpoint.forward,
-            segmentProgress).normalized;
-
-        Vector3 checkpointDirection = nextPosition - transform.position;
-        checkpointDirection.y = 0f;
-
-        Vector3 alignmentDirection = blendedForward;
-        alignmentDirection.y = 0f;
-
-        Vector3 targetDirection = Vector3.Lerp(
-            checkpointDirection.normalized,
-            alignmentDirection.normalized,
-            forwardAlignmentWeight).normalized;
-
-        currentAimPoint = nextPosition + targetDirection * lookAheadDistance;
-        directionToAimPoint = currentAimPoint - transform.position;
-        directionToAimPoint.y = 0f;
-
-        return directionToAimPoint.sqrMagnitude >= 0.001f;
+        return true;
     }
 
-    private void DriveToward(Vector3 directionToAimPoint, float lateralError, float speed01, float desiredSpeed)
+    private Vector3 GetWeightedPathDirection(int closestSampleIndex)
     {
-        float signedAngle = Vector3.SignedAngle(transform.forward, directionToAimPoint.normalized, Vector3.up);
-        float headingSteer = signedAngle / steerAngleForFullInput * headingSteerGain;
-        float lateralSteer = Mathf.Clamp(lateralError * lateralSteerGain, -0.65f, 0.65f);
-        float yawRate = GetYawRate();
-        float forwardSteerInput = Mathf.Clamp(headingSteer - lateralSteer - yawRate * yawDampingGain, -1f, 1f);
-        UpdateObstacleAvoidance(forwardSteerInput);
-        forwardSteerInput = Mathf.Clamp(forwardSteerInput + currentObstacleAvoidanceSteer, -1f, 1f);
+        Vector3 weightedDirection = Vector3.zero;
+        float totalWeight = 0f;
+        float sampleDistance = lookAheadDistance;
+        float sampleWeight = 1f;
 
-        float steeringSeverity = Mathf.Abs(signedAngle);
-        currentThrottleInput = Mathf.Lerp(maxThrottle, cautiousThrottle, Mathf.InverseLerp(0f, steeringAngleForCaution, steeringSeverity));
-        currentHandbrakeInput = steeringSeverity >= handbrakeAngle && speed01 > 0.2f;
-        currentNitrosInput = steeringSeverity <= nitrosMaxSteeringAngle && speed01 >= nitrosMinSpeed01;
-
-        if (steeringSeverity >= wrongWayBrakeAngle)
+        for (int i = 0; i < pathSampleCount; i++)
         {
-            currentThrottleInput = -0.35f;
-            currentHandbrakeInput = false;
-            currentNitrosInput = false;
-        }
-        else if (steeringSeverity >= brakeAngle)
-        {
-            currentThrottleInput = -0.25f;
-            currentNitrosInput = false;
-        }
+            Vector3 samplePoint = racingLine.GetPointAheadByDistance(closestSampleIndex, sampleDistance);
+            Vector3 sampleDirection = samplePoint - transform.position;
+            sampleDirection.y = 0f;
 
-        if (currentObstacleBrakeInput > 0f && currentThrottleInput > -currentObstacleBrakeInput)
-        {
-            currentThrottleInput = -currentObstacleBrakeInput;
-            currentHandbrakeInput = false;
-            currentNitrosInput = false;
-        }
-
-        if (desiredSpeed > 0.01f && currentThrottleInput > 0f)
-        {
-            float forwardSpeed = Mathf.Max(0f, carController.currentForwardVelocity);
-            float speedError = desiredSpeed - forwardSpeed;
-
-            if (speedError <= -speedLimitBrakeMargin)
+            if (sampleDirection.sqrMagnitude > 0.001f)
             {
-                currentThrottleInput = -speedLimitBrakeInput;
-                currentHandbrakeInput = false;
-                currentNitrosInput = false;
-            }
-            else if (speedError <= 0f)
-            {
-                currentThrottleInput = Mathf.Min(currentThrottleInput, cautiousThrottle);
-                currentNitrosInput = false;
-            }
-        }
-
-        float targetSteerInput = currentThrottleInput < -0.01f ? -forwardSteerInput : forwardSteerInput;
-        float steerT = steerSmoothing > 0f ? 1f - Mathf.Exp(-steerSmoothing * Time.fixedDeltaTime) : 1f;
-        smoothedSteerInput = Mathf.Lerp(smoothedSteerInput, targetSteerInput, steerT);
-        currentSteerInput = Mathf.Clamp(smoothedSteerInput, -1f, 1f);
-
-        SetBotInput(currentThrottleInput, currentSteerInput, currentNitrosInput, currentHandbrakeInput);
-    }
-
-    private void CompleteCheckpointByDistanceIfNeeded()
-    {
-        if (!useDistanceCheckpointCompletion || raceController == null)
-        {
-            return;
-        }
-
-        Transform nextCheckpoint = raceController.NextCheckpointTransform;
-        if (nextCheckpoint == null)
-        {
-            return;
-        }
-
-        Vector3 checkpointDirection = nextCheckpoint.position - transform.position;
-        checkpointDirection.y = 0f;
-
-        if (checkpointDirection.magnitude <= checkpointReachDistance)
-        {
-            raceController.CompleteNextCheckpoint();
-        }
-    }
-
-    private void OnDisable()
-    {
-        if (carController != null)
-        {
-            carController.ClearExternalInput();
-        }
-    }
-
-    private float GetYawRate()
-    {
-        if (carRigidbody == null)
-        {
-            return 0f;
-        }
-
-        return Vector3.Dot(carRigidbody.angularVelocity, transform.up);
-    }
-
-    private void UpdateObstacleAvoidance(float desiredForwardSteer)
-    {
-        currentObstacleAvoidanceSteer = 0f;
-        currentObstacleBrakeInput = 0f;
-
-        if (!enableObstacleAvoidance)
-        {
-            return;
-        }
-
-        Vector3 origin = transform.position + transform.up * avoidanceRayOriginHeight + transform.forward * avoidanceRayForwardOffset;
-        float steerTotal = 0f;
-        float weightTotal = 0f;
-
-        for (int i = 0; i < forwardAvoidanceAngles.Length; i++)
-        {
-            float angle = forwardAvoidanceAngles[i];
-            Vector3 direction = Quaternion.AngleAxis(angle, transform.up) * transform.forward;
-
-            if (!TryRaycastObstacle(origin, direction, forwardAvoidanceRayLength, out RaycastHit hit))
-            {
-                continue;
+                weightedDirection += sampleDirection.normalized * sampleWeight;
+                totalWeight += sampleWeight;
             }
 
-            float proximity = 1f - Mathf.Clamp01(hit.distance / forwardAvoidanceRayLength);
-            float steerAway = GetForwardObstacleSteerAway(angle, hit, desiredForwardSteer);
-            float centerWeight = 1f - Mathf.Abs(angle) / 90f;
-            float weight = proximity * Mathf.Lerp(0.65f, 1.2f, centerWeight);
-
-            steerTotal += steerAway * weight;
-            weightTotal += weight;
-
-            if (hit.distance <= avoidanceBrakeDistance)
-            {
-                currentObstacleBrakeInput = Mathf.Max(currentObstacleBrakeInput, avoidanceBrakeInput * proximity);
-            }
+            sampleDistance *= pathSampleDistanceMultiplier;
+            sampleWeight *= pathSampleWeightFalloff;
         }
 
-        AddSideAvoidance(origin, -transform.right, 1f, ref steerTotal, ref weightTotal);
-        AddSideAvoidance(origin, transform.right, -1f, ref steerTotal, ref weightTotal);
-
-        if (weightTotal > 0.001f)
-        {
-            currentObstacleAvoidanceSteer = Mathf.Clamp(steerTotal / weightTotal, -1f, 1f);
-        }
+        return totalWeight > 0.001f ? (weightedDirection / totalWeight).normalized : Vector3.zero;
     }
 
-    private float GetForwardObstacleSteerAway(float rayAngle, RaycastHit hit, float desiredForwardSteer)
+    private Vector3 GetCollisionAvoidanceDirection()
     {
-        if (Mathf.Abs(rayAngle) > 0.1f)
+        if (collisionAvoidanceWeight <= 0f || avoidanceRayDistance <= 0f)
         {
-            return -Mathf.Sign(rayAngle) * forwardAvoidanceSteerGain;
+            return Vector3.zero;
         }
 
-        float normalSide = Vector3.Dot(hit.normal, transform.right);
-        if (Mathf.Abs(normalSide) > 0.1f)
-        {
-            return Mathf.Sign(normalSide) * forwardAvoidanceSteerGain;
-        }
+        Vector3 origin = transform.position
+            + Vector3.up * avoidanceRayHeight
+            + transform.forward * avoidanceRayForwardOffset;
+        Vector3 avoidanceDirection = Vector3.zero;
 
-        float desiredSign = Mathf.Abs(desiredForwardSteer) > 0.05f ? Mathf.Sign(desiredForwardSteer) : 1f;
-        return -desiredSign * forwardAvoidanceSteerGain;
+        AddAvoidanceFromRay(origin, transform.forward, -transform.right, ref avoidanceDirection);
+        AddAvoidanceFromRay(origin, Quaternion.AngleAxis(-avoidanceRayAngle, Vector3.up) * transform.forward, transform.right, ref avoidanceDirection);
+        AddAvoidanceFromRay(origin, Quaternion.AngleAxis(avoidanceRayAngle, Vector3.up) * transform.forward, -transform.right, ref avoidanceDirection);
+
+        avoidanceDirection.y = 0f;
+        return avoidanceDirection.sqrMagnitude > 0.001f ? avoidanceDirection.normalized : Vector3.zero;
     }
 
-    private void AddSideAvoidance(Vector3 origin, Vector3 direction, float steerAway, ref float steerTotal, ref float weightTotal)
+    private void AddAvoidanceFromRay(Vector3 origin, Vector3 rayDirection, Vector3 avoidDirection, ref Vector3 avoidanceDirection)
     {
-        if (!TryRaycastObstacle(origin, direction, sideAvoidanceRayLength, out RaycastHit hit))
-        {
-            return;
-        }
-
-        float proximity = 1f - Mathf.Clamp01(hit.distance / sideAvoidanceRayLength);
-        float weight = proximity * sideAvoidanceSteerGain;
-        steerTotal += steerAway * weight;
-        weightTotal += weight;
-    }
-
-    private bool TryRaycastObstacle(Vector3 origin, Vector3 direction, float distance, out RaycastHit closestHit)
-    {
-        closestHit = default;
-
-        if (distance <= 0f)
-        {
-            return false;
-        }
-
         int hitCount = Physics.RaycastNonAlloc(
             origin,
-            direction,
-            obstacleHits,
-            distance,
+            rayDirection,
+            avoidanceHits,
+            avoidanceRayDistance,
             obstacleLayers,
             QueryTriggerInteraction.Ignore);
 
@@ -466,8 +221,8 @@ public class BotCarController : MonoBehaviour
 
         for (int i = 0; i < hitCount; i++)
         {
-            RaycastHit hit = obstacleHits[i];
-            if (hit.collider == null || IsOwnCollider(hit.collider))
+            RaycastHit hit = avoidanceHits[i];
+            if (hit.collider == null || hit.collider.transform == transform || hit.collider.transform.IsChildOf(transform))
             {
                 continue;
             }
@@ -475,46 +230,91 @@ public class BotCarController : MonoBehaviour
             if (hit.distance < closestDistance)
             {
                 closestDistance = hit.distance;
-                closestHit = hit;
                 foundHit = true;
             }
         }
 
-        return foundHit;
-    }
-
-    private bool IsOwnCollider(Collider hitCollider)
-    {
-        return hitCollider.transform == transform || hitCollider.transform.IsChildOf(transform);
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        if (!enableObstacleAvoidance)
+        if (!foundHit)
         {
             return;
         }
 
-        Vector3 origin = transform.position + transform.up * avoidanceRayOriginHeight + transform.forward * avoidanceRayForwardOffset;
-        Gizmos.color = new Color(1f, 0.6f, 0.1f);
-
-        for (int i = 0; i < forwardAvoidanceAngles.Length; i++)
-        {
-            Vector3 direction = Quaternion.AngleAxis(forwardAvoidanceAngles[i], transform.up) * transform.forward;
-            Gizmos.DrawLine(origin, origin + direction * forwardAvoidanceRayLength);
-        }
-
-        Gizmos.color = new Color(0.2f, 0.7f, 1f);
-        Gizmos.DrawLine(origin, origin - transform.right * sideAvoidanceRayLength);
-        Gizmos.DrawLine(origin, origin + transform.right * sideAvoidanceRayLength);
+        float proximity = 1f - Mathf.Clamp01(closestDistance / avoidanceRayDistance);
+        avoidanceDirection += avoidDirection.normalized * proximity;
     }
 
-    private void SetBotInput(float throttle, float steer, bool nitros = false, bool handbrake = false)
+    private float CalculatePidSteer(float headingError)
+    {
+        float normalizedError = headingError / steerAngleForFullInput;
+        float deltaTime = Mathf.Max(Time.fixedDeltaTime, 0.0001f);
+
+        steeringIntegral = Mathf.Clamp(
+            steeringIntegral + normalizedError * deltaTime,
+            -integralLimit,
+            integralLimit);
+
+        float derivative = hasPreviousHeadingError
+            ? (normalizedError - previousHeadingError) / deltaTime
+            : 0f;
+
+        previousHeadingError = normalizedError;
+        hasPreviousHeadingError = true;
+
+        return Mathf.Clamp(
+            normalizedError * proportionalGain
+            + steeringIntegral * integralGain
+            + derivative * derivativeGain,
+            -1f,
+            1f);
+    }
+
+    private float CalculateThrottle(float desiredSpeed)
+    {
+        if (desiredSpeed <= 0.01f)
+        {
+            return maxThrottle;
+        }
+
+        float forwardSpeed = Mathf.Max(0f, carController.currentForwardVelocity);
+        float speedError = desiredSpeed - forwardSpeed;
+
+        if (speedError <= -speedBrakeMargin)
+        {
+            return -speedBrakeInput;
+        }
+
+        if (speedError <= 0f)
+        {
+            return 0f;
+        }
+
+        return maxThrottle;
+    }
+
+    private void ResetPid()
+    {
+        steeringIntegral = 0f;
+        previousHeadingError = 0f;
+        hasPreviousHeadingError = false;
+        currentSteerInput = 0f;
+        currentThrottleInput = 0f;
+        currentHeadingError = 0f;
+    }
+
+    private void OnDisable()
+    {
+        ResetPid();
+
+        if (carController != null)
+        {
+            carController.ClearExternalInput();
+        }
+    }
+
+    private void SetBotInput(float throttle, float steer)
     {
         currentThrottleInput = Mathf.Clamp(throttle, -1f, 1f);
         currentSteerInput = Mathf.Clamp(steer, -1f, 1f);
-        currentNitrosInput = nitros;
-        currentHandbrakeInput = handbrake;
-        carController.SetExternalInput(currentThrottleInput, currentSteerInput, currentNitrosInput, currentHandbrakeInput);
+        carController.SetExternalInput(currentThrottleInput, currentSteerInput);
     }
 }

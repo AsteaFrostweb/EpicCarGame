@@ -172,6 +172,24 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 25.499664, y: 12.527776, z: 3.421251}
   m_Center: {x: -1.3572444, y: 3.3686316, z: -1.2106171}
+--- !u!1 &32559679 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2307980819228717134, guid: 42871ce8079a0084fbf1fd9e39112f7d, type: 3}
+  m_PrefabInstance: {fileID: 710838997}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &32559689
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 32559679}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ef0b5a7afb1dd9418196e6f27c62693, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ignoreBotCollisions: 1
 --- !u!1001 &40363604
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -313,6 +331,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 3895d318279c33c4a86fa5457a9ffc8d, type: 3}
       propertyPath: m_Name
       value: tire_stack (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 3895d318279c33c4a86fa5457a9ffc8d, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1984,6 +2006,24 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: a5de50af678b82140bad4e95bba80729, type: 3}
   m_PrefabInstance: {fileID: 477827475}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &534987656 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 659542691215079558, guid: 8abda568a8da7af45bb5b2b80d11d272, type: 3}
+  m_PrefabInstance: {fileID: 1960208092}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &534987666
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 534987656}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ef0b5a7afb1dd9418196e6f27c62693, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ignoreBotCollisions: 1
 --- !u!1 &545202065
 GameObject:
   m_ObjectHideFlags: 0
@@ -2607,8 +2647,16 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8812535244211773014, guid: 42871ce8079a0084fbf1fd9e39112f7d, type: 3}
+      propertyPath: derivativeGain
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8812535244211773014, guid: 42871ce8079a0084fbf1fd9e39112f7d, type: 3}
       propertyPath: headingSteerGain
       value: 0.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 8812535244211773014, guid: 42871ce8079a0084fbf1fd9e39112f7d, type: 3}
+      propertyPath: avoidanceRayAngle
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 8812535244211773014, guid: 42871ce8079a0084fbf1fd9e39112f7d, type: 3}
       propertyPath: currentAimPoint.y
@@ -2619,8 +2667,12 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8812535244211773014, guid: 42871ce8079a0084fbf1fd9e39112f7d, type: 3}
+      propertyPath: avoidanceRayDistance
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8812535244211773014, guid: 42871ce8079a0084fbf1fd9e39112f7d, type: 3}
       propertyPath: baseLookAheadDistance
-      value: 2
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 8812535244211773014, guid: 42871ce8079a0084fbf1fd9e39112f7d, type: 3}
       propertyPath: sideAvoidanceRayLength
@@ -2628,11 +2680,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8812535244211773014, guid: 42871ce8079a0084fbf1fd9e39112f7d, type: 3}
       propertyPath: speedLookAheadDistance
-      value: 34
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 8812535244211773014, guid: 42871ce8079a0084fbf1fd9e39112f7d, type: 3}
       propertyPath: steerAngleForFullInput
-      value: 30
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 8812535244211773014, guid: 42871ce8079a0084fbf1fd9e39112f7d, type: 3}
       propertyPath: enableObstacleAvoidance
@@ -2643,6 +2695,10 @@ PrefabInstance:
       value: 0.45
       objectReference: {fileID: 0}
     - target: {fileID: 8812535244211773014, guid: 42871ce8079a0084fbf1fd9e39112f7d, type: 3}
+      propertyPath: collisionAvoidanceWeight
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8812535244211773014, guid: 42871ce8079a0084fbf1fd9e39112f7d, type: 3}
       propertyPath: avoidanceRayForwardOffset
       value: 1.84
       objectReference: {fileID: 0}
@@ -2650,10 +2706,17 @@ PrefabInstance:
       propertyPath: forwardAvoidanceRayLength
       value: 0.9
       objectReference: {fileID: 0}
+    - target: {fileID: 8812535244211773014, guid: 42871ce8079a0084fbf1fd9e39112f7d, type: 3}
+      propertyPath: lateralAimCatchupDistance
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 2307980819228717134, guid: 42871ce8079a0084fbf1fd9e39112f7d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 32559689}
   m_SourcePrefab: {fileID: 100100000, guid: 42871ce8079a0084fbf1fd9e39112f7d, type: 3}
 --- !u!1001 &728024922
 PrefabInstance:
@@ -5790,6 +5853,11 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 25.499664, y: 12.527776, z: 3.421251}
   m_Center: {x: -1.3572444, y: 3.3686316, z: -1.2106171}
+--- !u!1 &1772688155 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6660330843804716651, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
+  m_PrefabInstance: {fileID: 6938161443409180459}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1791418129
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6435,8 +6503,16 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9107596572937014311, guid: 8abda568a8da7af45bb5b2b80d11d272, type: 3}
+      propertyPath: derivativeGain
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 9107596572937014311, guid: 8abda568a8da7af45bb5b2b80d11d272, type: 3}
       propertyPath: headingSteerGain
       value: 0.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 9107596572937014311, guid: 8abda568a8da7af45bb5b2b80d11d272, type: 3}
+      propertyPath: avoidanceRayAngle
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 9107596572937014311, guid: 8abda568a8da7af45bb5b2b80d11d272, type: 3}
       propertyPath: currentAimPoint.y
@@ -6447,8 +6523,12 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 9107596572937014311, guid: 8abda568a8da7af45bb5b2b80d11d272, type: 3}
+      propertyPath: avoidanceRayDistance
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 9107596572937014311, guid: 8abda568a8da7af45bb5b2b80d11d272, type: 3}
       propertyPath: baseLookAheadDistance
-      value: 2
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 9107596572937014311, guid: 8abda568a8da7af45bb5b2b80d11d272, type: 3}
       propertyPath: sideAvoidanceRayLength
@@ -6456,11 +6536,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9107596572937014311, guid: 8abda568a8da7af45bb5b2b80d11d272, type: 3}
       propertyPath: speedLookAheadDistance
-      value: 34
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 9107596572937014311, guid: 8abda568a8da7af45bb5b2b80d11d272, type: 3}
       propertyPath: steerAngleForFullInput
-      value: 30
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 9107596572937014311, guid: 8abda568a8da7af45bb5b2b80d11d272, type: 3}
       propertyPath: enableObstacleAvoidance
@@ -6471,6 +6551,10 @@ PrefabInstance:
       value: 0.45
       objectReference: {fileID: 0}
     - target: {fileID: 9107596572937014311, guid: 8abda568a8da7af45bb5b2b80d11d272, type: 3}
+      propertyPath: collisionAvoidanceWeight
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 9107596572937014311, guid: 8abda568a8da7af45bb5b2b80d11d272, type: 3}
       propertyPath: avoidanceRayForwardOffset
       value: 1.84
       objectReference: {fileID: 0}
@@ -6478,10 +6562,17 @@ PrefabInstance:
       propertyPath: forwardAvoidanceRayLength
       value: 0.9
       objectReference: {fileID: 0}
+    - target: {fileID: 9107596572937014311, guid: 8abda568a8da7af45bb5b2b80d11d272, type: 3}
+      propertyPath: lateralAimCatchupDistance
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 659542691215079558, guid: 8abda568a8da7af45bb5b2b80d11d272, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 534987666}
   m_SourcePrefab: {fileID: 100100000, guid: 8abda568a8da7af45bb5b2b80d11d272, type: 3}
 --- !u!1 &2001471463
 GameObject:
@@ -9146,11 +9237,19 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2216312125978952164, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2216312125978952164, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
+      propertyPath: derivativeGain
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 2216312125978952164, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
       propertyPath: headingSteerGain
       value: 0.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 2216312125978952164, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
+      propertyPath: avoidanceRayAngle
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 2216312125978952164, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
       propertyPath: currentAimPoint.y
@@ -9161,8 +9260,12 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2216312125978952164, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
+      propertyPath: avoidanceRayDistance
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 2216312125978952164, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
       propertyPath: baseLookAheadDistance
-      value: 2
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 2216312125978952164, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
       propertyPath: sideAvoidanceRayLength
@@ -9170,11 +9273,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2216312125978952164, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
       propertyPath: speedLookAheadDistance
-      value: 34
+      value: 16
       objectReference: {fileID: 0}
     - target: {fileID: 2216312125978952164, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
       propertyPath: steerAngleForFullInput
-      value: 30
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 2216312125978952164, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
       propertyPath: enableObstacleAvoidance
@@ -9185,12 +9288,20 @@ PrefabInstance:
       value: 0.45
       objectReference: {fileID: 0}
     - target: {fileID: 2216312125978952164, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
+      propertyPath: collisionAvoidanceWeight
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2216312125978952164, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
       propertyPath: avoidanceRayForwardOffset
       value: 1.84
       objectReference: {fileID: 0}
     - target: {fileID: 2216312125978952164, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
       propertyPath: forwardAvoidanceRayLength
       value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 2216312125978952164, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
+      propertyPath: lateralAimCatchupDistance
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2341375902498674058, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
       propertyPath: motorTorque
@@ -9247,7 +9358,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6660330843804716651, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8536995662500073070}
   m_SourcePrefab: {fileID: 100100000, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
 --- !u!224 &6968043393864119798
 RectTransform:
@@ -9610,6 +9724,19 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7279289613134743217, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
   m_PrefabInstance: {fileID: 6938161443409180459}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &8536995662500073070
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1772688155}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4ef0b5a7afb1dd9418196e6f27c62693, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ignoreBotCollisions: 1
 --- !u!1 &8745036806353190524
 GameObject:
   m_ObjectHideFlags: 0
