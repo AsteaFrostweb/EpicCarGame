@@ -373,7 +373,7 @@ PositionConstraint:
   m_Active: 1
   m_IsLocked: 1
   m_Sources:
-  - sourceTransform: {fileID: 8536995662500073061}
+  - sourceTransform: {fileID: 0}
     weight: 1
 --- !u!4 &302493764
 Transform:
@@ -383,8 +383,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 302493762}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -111.99501, y: 0.41550016, z: -105.81999}
+  m_LocalRotation: {x: 0, y: -0.7071068, z: 0, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0.87, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -409,8 +409,13 @@ RotationConstraint:
   m_Active: 1
   m_IsLocked: 1
   m_Sources:
-  - sourceTransform: {fileID: 8536995662500073061}
+  - sourceTransform: {fileID: 0}
     weight: 1
+--- !u!4 &319413598 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7279289613134743217, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
+  m_PrefabInstance: {fileID: 2063474303}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &393945275
 GameObject:
   m_ObjectHideFlags: 0
@@ -957,7 +962,7 @@ PrefabInstance:
     - target: {fileID: 5986236349175801746, guid: 9e6e65014ac2827438a2b98c79b2a9b4, type: 3}
       propertyPath: target
       value: 
-      objectReference: {fileID: 8536995662500073061}
+      objectReference: {fileID: 319413598}
     - target: {fileID: 5986236349175801746, guid: 9e6e65014ac2827438a2b98c79b2a9b4, type: 3}
       propertyPath: useGroundClearance
       value: 0
@@ -1201,7 +1206,7 @@ Light:
   m_Enabled: 1
   serializedVersion: 11
   m_Type: 1
-  m_Color: {r: 0.9811321, g: 0.9811321, b: 0.9811321, a: 1}
+  m_Color: {r: 0.01886791, g: 0.01886791, b: 0.01886791, a: 1}
   m_Intensity: 130000
   m_Range: 10
   m_SpotAngle: 30
@@ -1245,7 +1250,7 @@ Light:
   m_LightShadowCasterMode: 2
   m_AreaSize: {x: 0.5, y: 0.5}
   m_BounceIntensity: 1
-  m_ColorTemperature: 7563
+  m_ColorTemperature: 9461
   m_UseColorTemperature: 1
   m_BoundingSphereOverride: {x: 0, y: 0, z: 0, w: 0}
   m_UseBoundingSphereOverride: 0
@@ -3210,11 +3215,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &8536995662500073061 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 8536995660524687386, guid: 1b55057692daf264cb70322aa5f0d123, type: 3}
-  m_PrefabInstance: {fileID: 2063474303}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &8745036806353190524
 GameObject:
   m_ObjectHideFlags: 0
