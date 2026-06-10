@@ -311,7 +311,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 659542691215079558}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 06b9a1a9bfa2681429796de678c47741, type: 3}
   m_Name: 
@@ -385,54 +385,36 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   carController: {fileID: 4163355570274251148}
-  raceController: {fileID: 4168421316462202189}
-  carRigidbody: {fileID: 0}
   racingLine: {fileID: 0}
-  baseLookAheadDistance: 16
-  speedLookAheadDistance: 14
-  lateralErrorLookAheadMultiplier: 1.2
-  maxLateralErrorLookAhead: 18
-  fallbackToCheckpoints: 1
-  useDistanceCheckpointCompletion: 0
-  checkpointReachDistance: 8
-  forwardAlignmentWeight: 0.828
-  steerAngleForFullInput: 45
-  maxThrottle: 0.9
-  cautiousThrottle: 0.45
-  speedLimitBrakeMargin: 4
-  speedLimitBrakeInput: 0.25
-  steeringAngleForCaution: 25
-  brakeAngle: 80
-  wrongWayBrakeAngle: 120
-  handbrakeAngle: 65
-  nitrosMaxSteeringAngle: 10
-  nitrosMinSpeed01: 0.35
-  headingSteerGain: 1
-  lateralSteerGain: 0.035
-  yawDampingGain: 0.18
-  steerSmoothing: 8
-  lateralErrorLookAhead: 5
-  enableObstacleAvoidance: 0
+  lookAheadDistance: 12
+  pathSampleCount: 4
+  pathSampleDistanceMultiplier: 1.6
+  pathSampleWeightFalloff: 0.55
   obstacleLayers:
     serializedVersion: 2
     m_Bits: 8
-  avoidanceRayOriginHeight: 0.75
+  collisionAvoidanceWeight: 1.5
+  avoidanceRayDistance: 12
+  avoidanceRayHeight: 0.75
   avoidanceRayForwardOffset: 1.8
-  forwardAvoidanceRayLength: 14
-  sideAvoidanceRayLength: 4
-  forwardAvoidanceSteerGain: 1.15
-  sideAvoidanceSteerGain: 0.85
-  avoidanceBrakeDistance: 5
-  avoidanceBrakeInput: 0.35
+  avoidanceRayAngle: 35
+  steerAngleForFullInput: 45
+  proportionalGain: 1
+  integralGain: 0
+  derivativeGain: 0.08
+  integralLimit: 1
+  maxThrottle: 0.9
+  speedBrakeMargin: 4
+  speedBrakeInput: 0.35
   currentSteerInput: 0
   currentThrottleInput: 0
-  currentHandbrakeInput: 0
-  currentNitrosInput: 0
   segmentProgress: 0
   currentDesiredSpeed: 0
-  currentObstacleAvoidanceSteer: 0
-  currentObstacleBrakeInput: 0
+  currentHeadingError: 0
   currentAimPoint: {x: 0, y: 0, z: 0}
+  currentPathDirection: {x: 0, y: 0, z: 0}
+  currentAvoidanceDirection: {x: 0, y: 0, z: 0}
+  currentMovementDirection: {x: 0, y: 0, z: 0}
 --- !u!1 &1016495613542954142
 GameObject:
   m_ObjectHideFlags: 0
