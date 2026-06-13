@@ -175,6 +175,7 @@ GameObject:
   - component: {fileID: 2126097331492111972}
   - component: {fileID: 1507625467229363892}
   - component: {fileID: 8812535244211773014}
+  - component: {fileID: -3133814408688764143}
   m_Layer: 3
   m_Name: Subaru
   m_TagString: Untagged
@@ -537,7 +538,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2307980819228717134}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f86d4e6929e033445b50d665b92ad8a0, type: 3}
   m_Name: 
@@ -551,15 +552,15 @@ MonoBehaviour:
   obstacleLayers:
     serializedVersion: 2
     m_Bits: 8
-  collisionAvoidanceWeight: 1.5
-  avoidanceRayDistance: 12
-  avoidanceRayHeight: 0.75
-  avoidanceRayForwardOffset: 1.8
-  avoidanceRayAngle: 35
+  collisionAvoidanceWeight: 0.25
+  avoidanceRayDistance: 2
+  avoidanceRayHeight: 0.5
+  avoidanceRayForwardOffset: 1.6
+  avoidanceRayAngle: 15
   steerAngleForFullInput: 45
   proportionalGain: 1
   integralGain: 0
-  derivativeGain: 0.08
+  derivativeGain: 0.2
   integralLimit: 1
   maxThrottle: 0.9
   speedBrakeMargin: 4
@@ -573,6 +574,26 @@ MonoBehaviour:
   currentPathDirection: {x: 0, y: 0, z: 0}
   currentAvoidanceDirection: {x: 0, y: 0, z: 0}
   currentMovementDirection: {x: 0, y: 0, z: 0}
+--- !u!114 &-3133814408688764143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2307980819228717134}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a75f664cac2f4a4d8c350ed7328de83, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  value: 0
+  name: Subaru
+  racingLine: {fileID: 0}
+  trackRaceProgress: 1
+  splineDistanceCovered: 0
+  currentSplineDistance: 0
+  currentSplineSampleIndex: 0
+  currentClosestSplinePoint: {x: 0, y: 0, z: 0}
 --- !u!1 &2840275436462033896
 GameObject:
   m_ObjectHideFlags: 0

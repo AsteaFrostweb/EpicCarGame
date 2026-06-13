@@ -1,21 +1,17 @@
-using NUnit.Framework;
 using System;
 using System.Collections.Generic;
-using System.Dynamic;
 using System.Linq;
-using System.Xml.Serialization;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GarageUIMasterController : MonoBehaviour
 {
     [Serializable]
     public struct CarLoadEntity 
     {
-        public string name;
-        public GameObject reference;
+        public Car car;
         public GameObject spawnInstance;
     }
-    public List<string> carsToLoad = new List<string>() {"Subaru", "Pickle", "Beemer", "Mustang"};
     public List<CarLoadEntity> sucessfullyLoadedCars = new List<CarLoadEntity>();
 
     public GameObject CarSpawnPosition;
@@ -28,26 +24,23 @@ public class GarageUIMasterController : MonoBehaviour
 
     private void Start()
     {
-        foreach (string carName in carsToLoad) 
+        sucessfullyLoadedCars.Clear();
+
+        foreach (Car car in Car.allCars.Values.OrderBy(car => car.name)) 
         {
-            GameObject obj = Resources.Load<GameObject>("Prefabs/Cars/" + carName);
-
-            if (obj != null)
+            CarLoadEntity cle = new CarLoadEntity
             {
-                CarLoadEntity cle = new CarLoadEntity 
-                {
-                    name = carName,
-                    reference = obj,
-                    spawnInstance = null
-                };
+                car = car,
+                spawnInstance = null
+            };
 
-                sucessfullyLoadedCars.Add(cle);
-            }            
+            sucessfullyLoadedCars.Add(cle);
         }
         totalLoadedCars = sucessfullyLoadedCars.Count;
 
         //if the total loaded cars is 0 then set the UI to be un-initialized
         if (totalLoadedCars == 0) initialized = false;
+        if (!initialized) return;
 
         SpawnCar();
     }
@@ -55,7 +48,7 @@ public class GarageUIMasterController : MonoBehaviour
     private void SpawnCar() 
     {
         LoadCar(currentLoadedIndex);
-        currentLoadedCar.spawnInstance = GameObject.Instantiate(currentLoadedCar.reference, CarSpawnPosition.transform);
+        currentLoadedCar.spawnInstance = GameObject.Instantiate(currentLoadedCar.car.gameObject, CarSpawnPosition.transform);
     }
     private void LoadCar(int index) 
     {
@@ -86,4 +79,10 @@ public class GarageUIMasterController : MonoBehaviour
         SpawnCar();
     }
 
+
+    public void LoadRace() 
+    {
+        GameData.playerCarName = currentLoadedCar.car.name;
+        SceneManager.LoadScene(GameData.selectedTrackSceneName);
+    }
 }

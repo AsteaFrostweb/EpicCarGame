@@ -74,7 +74,7 @@ public class CameraFollow : MonoBehaviour
     }
 
     [Header("Target")]
-    [SerializeField] private Transform target;
+    [SerializeField] public Transform target;
     [SerializeField] private PlayerSettings playerSettings;
 
     [Header("Style Selection")]

@@ -19,6 +19,8 @@ public class RacingLineController : MonoBehaviour
     private readonly List<Vector3> sampledWorldPoints = new List<Vector3>();
     private readonly List<int> sampledSegmentIndices = new List<int>();
     private readonly List<float> sampledDesiredSpeeds = new List<float>();
+    private readonly List<float> sampledDistances = new List<float>();
+    private float totalLength;
 
     public bool ClosedLoop
     {
@@ -32,6 +34,7 @@ public class RacingLineController : MonoBehaviour
 
     public int ControlPointCount => localControlPoints.Count;
     public int SampleCount => sampledWorldPoints.Count;
+    public float TotalLength => totalLength;
     public IReadOnlyList<Vector3> SampledWorldPoints => sampledWorldPoints;
     public IReadOnlyList<float> SampledDesiredSpeeds => sampledDesiredSpeeds;
 
@@ -151,6 +154,87 @@ public class RacingLineController : MonoBehaviour
         return closestIndex;
     }
 
+    public bool TryGetClosestDistanceAlongSpline(Vector3 worldPosition, out float distanceAlongSpline, out int closestSampleIndex, out Vector3 closestPoint)
+    {
+        distanceAlongSpline = 0f;
+        closestSampleIndex = -1;
+        closestPoint = transform.position;
+
+        if (sampledWorldPoints.Count == 0)
+        {
+            return false;
+        }
+
+        if (sampledWorldPoints.Count == 1)
+        {
+            closestPoint = sampledWorldPoints[0];
+            closestSampleIndex = 0;
+            return true;
+        }
+
+        float closestSqrDistance = float.PositiveInfinity;
+        int segmentLimit = closedLoop ? sampledWorldPoints.Count : sampledWorldPoints.Count - 1;
+
+        for (int i = 0; i < segmentLimit; i++)
+        {
+            int nextIndex = i + 1;
+            if (nextIndex >= sampledWorldPoints.Count)
+            {
+                nextIndex = 0;
+            }
+
+            Vector3 segmentStart = sampledWorldPoints[i];
+            Vector3 segmentEnd = sampledWorldPoints[nextIndex];
+            Vector3 segment = segmentEnd - segmentStart;
+            float segmentSqrLength = segment.sqrMagnitude;
+            float t = segmentSqrLength > 0.001f
+                ? Mathf.Clamp01(Vector3.Dot(worldPosition - segmentStart, segment) / segmentSqrLength)
+                : 0f;
+
+            Vector3 projectedPoint = Vector3.Lerp(segmentStart, segmentEnd, t);
+            float sqrDistance = (projectedPoint - worldPosition).sqrMagnitude;
+            if (sqrDistance >= closestSqrDistance)
+            {
+                continue;
+            }
+
+            float segmentLength = Mathf.Sqrt(segmentSqrLength);
+            float segmentStartDistance = i < sampledDistances.Count ? sampledDistances[i] : 0f;
+            float projectedDistance = segmentStartDistance + segmentLength * t;
+
+            if (closedLoop && totalLength > 0.001f)
+            {
+                projectedDistance %= totalLength;
+            }
+
+            closestSqrDistance = sqrDistance;
+            distanceAlongSpline = projectedDistance;
+            closestSampleIndex = t < 0.5f ? i : nextIndex;
+            closestPoint = projectedPoint;
+        }
+
+        return closestSampleIndex >= 0;
+    }
+
+    public float GetDistanceAtSample(int sampleIndex)
+    {
+        if (sampledDistances.Count == 0)
+        {
+            return 0f;
+        }
+
+        if (closedLoop)
+        {
+            sampleIndex = WrapIndex(sampleIndex, sampledDistances.Count);
+        }
+        else
+        {
+            sampleIndex = Mathf.Clamp(sampleIndex, 0, sampledDistances.Count - 1);
+        }
+
+        return sampledDistances[sampleIndex];
+    }
+
     public Vector3 GetSampleWorldPoint(int sampleIndex)
     {
         if (sampledWorldPoints.Count == 0)
@@ -257,6 +341,8 @@ public class RacingLineController : MonoBehaviour
         sampledWorldPoints.Clear();
         sampledSegmentIndices.Clear();
         sampledDesiredSpeeds.Clear();
+        sampledDistances.Clear();
+        totalLength = 0f;
 
         int pointCount = localControlPoints.Count;
         if (pointCount == 0)
@@ -273,6 +359,7 @@ public class RacingLineController : MonoBehaviour
                 sampledDesiredSpeeds.Add(desiredSpeeds[i]);
             }
 
+            RebuildSampleDistances();
             return;
         }
 
@@ -303,6 +390,29 @@ public class RacingLineController : MonoBehaviour
             sampledWorldPoints.Add(GetControlPointWorld(pointCount - 1));
             sampledSegmentIndices.Add(pointCount - 2);
             sampledDesiredSpeeds.Add(desiredSpeeds[pointCount - 1]);
+        }
+
+        RebuildSampleDistances();
+    }
+
+    private void RebuildSampleDistances()
+    {
+        sampledDistances.Clear();
+        totalLength = 0f;
+
+        for (int i = 0; i < sampledWorldPoints.Count; i++)
+        {
+            sampledDistances.Add(totalLength);
+
+            if (i < sampledWorldPoints.Count - 1)
+            {
+                totalLength += Vector3.Distance(sampledWorldPoints[i], sampledWorldPoints[i + 1]);
+            }
+        }
+
+        if (closedLoop && sampledWorldPoints.Count > 1)
+        {
+            totalLength += Vector3.Distance(sampledWorldPoints[sampledWorldPoints.Count - 1], sampledWorldPoints[0]);
         }
     }
 

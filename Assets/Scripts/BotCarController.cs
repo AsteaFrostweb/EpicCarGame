@@ -26,12 +26,20 @@ public class BotCarController : MonoBehaviour
     [SerializeField] private float collisionAvoidanceWeight = 1.5f;
     [Tooltip("How far ahead the bot checks for obstacles.")]
     [SerializeField] private float avoidanceRayDistance = 12f;
+    [Tooltip("Radius used for obstacle feelers. Values above 0 use sphere casts so barriers are detected before the car is touching them.")]
+    [SerializeField] private float avoidanceCastRadius = 0.45f;
     [Tooltip("Height above the car origin where avoidance rays are cast.")]
     [SerializeField] private float avoidanceRayHeight = 0.75f;
     [Tooltip("Forward offset from the car origin where avoidance rays start.")]
     [SerializeField] private float avoidanceRayForwardOffset = 1.5f;
     [Tooltip("Angle of the left and right feeler rays.")]
     [SerializeField] private float avoidanceRayAngle = 35f;
+    [Tooltip("How far sideways the bot checks for track edges or barriers.")]
+    [SerializeField] private float sideAvoidanceDistance = 4f;
+    [Tooltip("Extra strength for side feelers, useful when cars scrape along track edges.")]
+    [SerializeField] private float sideAvoidanceWeight = 1.75f;
+    [Tooltip("Draw avoidance feelers in the Scene view while the game is running.")]
+    [SerializeField] private bool drawAvoidanceDebug = true;
 
     [Header("Steering PID")]
     [Tooltip("Heading error, in degrees, that maps to full steering input before PID gains. Lower values make steering more sensitive.")]
@@ -89,9 +97,12 @@ public class BotCarController : MonoBehaviour
         pathSampleWeightFalloff = Mathf.Clamp01(pathSampleWeightFalloff);
         collisionAvoidanceWeight = Mathf.Max(0f, collisionAvoidanceWeight);
         avoidanceRayDistance = Mathf.Max(0f, avoidanceRayDistance);
+        avoidanceCastRadius = Mathf.Max(0f, avoidanceCastRadius);
         avoidanceRayHeight = Mathf.Max(0f, avoidanceRayHeight);
         avoidanceRayForwardOffset = Mathf.Max(0f, avoidanceRayForwardOffset);
         avoidanceRayAngle = Mathf.Max(0f, avoidanceRayAngle);
+        sideAvoidanceDistance = Mathf.Max(0f, sideAvoidanceDistance);
+        sideAvoidanceWeight = Mathf.Max(0f, sideAvoidanceWeight);
         steerAngleForFullInput = Mathf.Max(1f, steerAngleForFullInput);
         proportionalGain = Mathf.Max(0f, proportionalGain);
         integralGain = Mathf.Max(0f, integralGain);
@@ -201,6 +212,8 @@ public class BotCarController : MonoBehaviour
         AddAvoidanceFromRay(origin, transform.forward, -transform.right, ref avoidanceDirection);
         AddAvoidanceFromRay(origin, Quaternion.AngleAxis(-avoidanceRayAngle, Vector3.up) * transform.forward, transform.right, ref avoidanceDirection);
         AddAvoidanceFromRay(origin, Quaternion.AngleAxis(avoidanceRayAngle, Vector3.up) * transform.forward, -transform.right, ref avoidanceDirection);
+        AddAvoidanceFromRay(origin, -transform.right, transform.right, ref avoidanceDirection, sideAvoidanceDistance, sideAvoidanceWeight);
+        AddAvoidanceFromRay(origin, transform.right, -transform.right, ref avoidanceDirection, sideAvoidanceDistance, sideAvoidanceWeight);
 
         avoidanceDirection.y = 0f;
         return avoidanceDirection.sqrMagnitude > 0.001f ? avoidanceDirection.normalized : Vector3.zero;
@@ -208,13 +221,40 @@ public class BotCarController : MonoBehaviour
 
     private void AddAvoidanceFromRay(Vector3 origin, Vector3 rayDirection, Vector3 avoidDirection, ref Vector3 avoidanceDirection)
     {
-        int hitCount = Physics.RaycastNonAlloc(
-            origin,
-            rayDirection,
-            avoidanceHits,
-            avoidanceRayDistance,
-            obstacleLayers,
-            QueryTriggerInteraction.Ignore);
+        AddAvoidanceFromRay(origin, rayDirection, avoidDirection, ref avoidanceDirection, avoidanceRayDistance, 1f);
+    }
+
+    private void AddAvoidanceFromRay(
+        Vector3 origin,
+        Vector3 rayDirection,
+        Vector3 avoidDirection,
+        ref Vector3 avoidanceDirection,
+        float castDistance,
+        float avoidanceWeight)
+    {
+        if (castDistance <= 0f)
+        {
+            return;
+        }
+
+        rayDirection = rayDirection.normalized;
+
+        int hitCount = avoidanceCastRadius > 0f
+            ? Physics.SphereCastNonAlloc(
+                origin,
+                avoidanceCastRadius,
+                rayDirection,
+                avoidanceHits,
+                castDistance,
+                obstacleLayers,
+                QueryTriggerInteraction.Ignore)
+            : Physics.RaycastNonAlloc(
+                origin,
+                rayDirection,
+                avoidanceHits,
+                castDistance,
+                obstacleLayers,
+                QueryTriggerInteraction.Ignore);
 
         float closestDistance = float.PositiveInfinity;
         bool foundHit = false;
@@ -236,11 +276,65 @@ public class BotCarController : MonoBehaviour
 
         if (!foundHit)
         {
+            DrawAvoidanceDebug(origin, rayDirection, castDistance, false);
             return;
         }
 
-        float proximity = 1f - Mathf.Clamp01(closestDistance / avoidanceRayDistance);
-        avoidanceDirection += avoidDirection.normalized * proximity;
+        float proximity = 1f - Mathf.Clamp01(closestDistance / castDistance);
+        avoidanceDirection += avoidDirection.normalized * proximity * avoidanceWeight;
+        DrawAvoidanceDebug(origin, rayDirection, castDistance, true);
+    }
+
+    private void DrawAvoidanceDebug(Vector3 origin, Vector3 direction, float distance, bool hit)
+    {
+        if (!drawAvoidanceDebug)
+        {
+            return;
+        }
+
+        Debug.DrawRay(origin, direction.normalized * distance, hit ? Color.red : Color.green, Time.fixedDeltaTime);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (!drawAvoidanceDebug)
+        {
+            return;
+        }
+
+        Vector3 origin = transform.position
+            + Vector3.up * avoidanceRayHeight
+            + transform.forward * avoidanceRayForwardOffset;
+
+        Gizmos.color = Color.green;
+        DrawAvoidanceGizmo(origin, transform.forward, avoidanceRayDistance);
+        DrawAvoidanceGizmo(origin, Quaternion.AngleAxis(-avoidanceRayAngle, Vector3.up) * transform.forward, avoidanceRayDistance);
+        DrawAvoidanceGizmo(origin, Quaternion.AngleAxis(avoidanceRayAngle, Vector3.up) * transform.forward, avoidanceRayDistance);
+        DrawAvoidanceGizmo(origin, -transform.right, sideAvoidanceDistance);
+        DrawAvoidanceGizmo(origin, transform.right, sideAvoidanceDistance);
+
+        if (currentAvoidanceDirection.sqrMagnitude > 0.001f)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawRay(origin, currentAvoidanceDirection.normalized * 4f);
+        }
+    }
+
+    private void DrawAvoidanceGizmo(Vector3 origin, Vector3 direction, float distance)
+    {
+        if (distance <= 0f)
+        {
+            return;
+        }
+
+        direction = direction.normalized;
+        Gizmos.DrawRay(origin, direction * distance);
+
+        if (avoidanceCastRadius > 0f)
+        {
+            Gizmos.DrawWireSphere(origin, avoidanceCastRadius);
+            Gizmos.DrawWireSphere(origin + direction * distance, avoidanceCastRadius);
+        }
     }
 
     private float CalculatePidSteer(float headingError)

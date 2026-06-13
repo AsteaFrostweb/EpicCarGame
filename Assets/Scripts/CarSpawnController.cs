@@ -5,30 +5,34 @@ using UnityEngine;
 
 public class CarSpawnController : MonoBehaviour
 {
-    public static CarSpawnController instance;
+    
     public List<Transform> carSpawnPoints;
     public bool[] assignedSpawnPoints;
+
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
        carSpawnPoints = transform.GetComponentsInChildren<Transform>().Where(t => t.gameObject.name.Contains("Spawn_")).ToList();
        assignedSpawnPoints = new bool[carSpawnPoints.Count];
-       instance = this;
+    
     }
 
-    public static Transform GetSpawnPoint() 
-    {
-        if (instance != null)
-        {
-            return instance.GetAvailableSpawnPoint();
-        }
-        return null; // No instance available
+    public Transform GetSpawnPoint(int maxCars) 
+    {       
+            return GetAvailableSpawnPoint(maxCars);       
     }
-    private Transform GetAvailableSpawnPoint()
+    private Transform GetAvailableSpawnPoint(int maxCars)
     {
-        for (int i = 0; i < assignedSpawnPoints.Length; i++)
+        // To ensure even distribution of cars across spawn points, we can calculate a step based on the number of spawn points and the maximum number of cars.
+        // This way, we can skip some spawn points if there are more spawn points than cars.
+        int spawnStep = carSpawnPoints.Count / maxCars;
+        for (int i = 0; i < assignedSpawnPoints.Length; i+= spawnStep)
         {
+            if (i > assignedSpawnPoints.Length - 1)
+                return null;
+
             if (!assignedSpawnPoints[i])
             {
                 assignedSpawnPoints[i] = true;
