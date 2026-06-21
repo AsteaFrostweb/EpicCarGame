@@ -231,8 +231,8 @@ MonoBehaviour:
     m_OverrideState: 0
     m_Value: 0
   maximumHeight:
-    m_OverrideState: 0
-    m_Value: 50
+    m_OverrideState: 1
+    m_Value: 353.9
   meanFreePath:
     m_OverrideState: 1
     m_Value: 79
@@ -241,7 +241,7 @@ MonoBehaviour:
     m_Value: 1
   albedo:
     m_OverrideState: 1
-    m_Value: {r: 0.53529084, g: 0.5568628, b: 0.20784312, a: 1}
+    m_Value: {r: 0.5568628, g: 0.2408973, b: 0.20784312, a: 1}
   globalLightProbeDimmer:
     m_OverrideState: 0
     m_Value: 1
